@@ -1,0 +1,28 @@
+{
+  "name": "swc-cli",
+  "version": "0.0.1",
+  "description": "CLI for the swc project",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/swc-project/cli.git"
+  },
+  "keywords": [
+    "swc",
+    "cli",
+    "babel",
+    "javascript"
+  ],
+  "author": "강동윤 <kdy1@outlook.kr>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/swc-project/cli/issues"
+  },
+  "homepage": "https://github.com/swc-project/cli#readme",
+  "devDependencies": {
+    "jest": "^23.6.0"
+  }
+}

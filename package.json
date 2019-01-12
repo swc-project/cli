@@ -14,6 +14,10 @@
     "swc",
     "cli",
     "babel",
+    "es6",
+    "transpile",
+    "transpiler",
+    "compiler",
     "javascript"
   ],
   "author": "강동윤 <kdy1@outlook.kr>",
@@ -22,7 +26,27 @@
     "url": "https://github.com/swc-project/cli/issues"
   },
   "homepage": "https://github.com/swc-project/cli#readme",
+  "peerDependencies": {
+    "swc": ">=1.0.0-beta.11"
+  },
   "devDependencies": {
-    "jest": "^23.6.0"
+    "@types/fs-readdir-recursive": "^1.0.0",
+    "@types/glob": "^7.1.1",
+    "@types/lodash": "^4.14.119",
+    "@types/mkdirp": "^0.5.2",
+    "@types/node": "^10.12.18",
+    "@types/slash": "^2.0.0",
+    "jest": "^23.6.0",
+    "swc": "^1.0.0-beta.11",
+    "typescript": "^3.2.2"
+  },
+  "dependencies": {
+    "commander": "^2.19.0",
+    "fs-readdir-recursive": "^1.1.0",
+    "glob": "^7.1.3",
+    "loadsh": "^0.0.3",
+    "mkdirp": "^0.5.1",
+    "output-file-sync": "^2.0.1",
+    "slash": "^2.0.0"
   }
 }

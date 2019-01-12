@@ -1,0 +1,177 @@
+import commander from 'commander';
+import uniq from "lodash/uniq";
+import glob from "glob";
+import { Config, JscConfig, ParserConfig } from 'swc';
+import pkg from "../package.json";
+
+
+// Standard swc input configs.
+commander.option(
+    "-f, --filename [filename]",
+    "filename to use when reading from stdin - this will be used in source-maps, errors etc",
+);
+
+commander.option("--config-file [path]", "Path to a .swcrc file to use");
+commander.option(
+    "--env-name [name]",
+    "The name of the 'env' to use when loading configs and plugins. " +
+    "Defaults to the value of SWC_ENV, or else NODE_ENV, or else 'development'.",
+);
+
+commander.option(
+    "--typescript",
+    "Treat input as typescript",
+);
+
+// Basic file input configuration.
+commander.option(
+    "--no-swcrc",
+    "Whether or not to look up .swcrc files",
+);
+
+commander.option(
+    "--ignore [list]",
+    "list of glob paths to **not** compile",
+    collect,
+);
+commander.option(
+    "--only [list]",
+    "list of glob paths to **only** compile",
+    collect,
+);
+
+commander.option("-w, --watch", "Recompile files on changes");
+
+
+commander.option(
+    "-o, --out-file [out]",
+    "Compile all input files into a single file",
+);
+commander.option(
+    "-d, --out-dir [out]",
+    "Compile an input directory of modules into an output directory",
+);
+
+commander.option(
+    "-D, --copy-files",
+    "When compiling a directory copy over non-compilable files",
+);
+commander.option(
+    "--include-dotfiles",
+    "Include dotfiles when compiling and copying non-compilable files",
+);
+
+commander.version(pkg.version);
+commander.usage("[options] <files ...>");
+
+
+function collect(value: any, previousValue: any): Array<string> {
+    // If the user passed the option with no value, like "babel file.js --presets", do nothing.
+    if (typeof value !== "string") return previousValue;
+
+    const values = value.split(",");
+
+    return previousValue ? previousValue.concat(values) : values;
+}
+
+export interface CliOptions {
+    readonly outDir: string;
+    readonly filenames: string[];
+    readonly extensions: string[];
+    readonly keepFileExtension: boolean;
+    readonly verbose: boolean;
+    readonly watch: boolean;
+    readonly relative: boolean;
+    readonly copyFiles: boolean;
+    readonly includeDotfiles: boolean;
+    readonly deleteDirOnStart: boolean;
+}
+
+
+export default function parserArgs(args: string[]) {
+    //
+    commander.parse(args);
+
+    const errors = [];
+
+    let filenames = commander.args.reduce(function (globbed: string[], input) {
+        let files = glob.sync(input);
+        if (!files.length) files = [input];
+        return globbed.concat(files);
+    }, []);
+    filenames = uniq(filenames);
+
+
+    if (commander.outDir && !filenames.length) {
+        errors.push("--out-dir requires filenames");
+    }
+
+    if (commander.outFile && commander.outDir) {
+        errors.push("--out-file and --out-dir cannot be used together");
+    }
+
+
+    if (commander.watch) {
+        if (!commander.outFile && !commander.outDir) {
+            errors.push("--watch requires --out-file or --out-dir");
+        }
+
+        if (!filenames.length) {
+            errors.push("--watch requires filenames");
+        }
+    }
+
+    if (
+        !commander.outDir &&
+        filenames.length === 0 &&
+        typeof commander.filename !== "string" &&
+        commander.babelrc !== false
+    ) {
+        errors.push(
+            "stdin compilation requires either -f/--filename [filename] or --no-swcrc",
+        );
+    }
+
+
+    if (errors.length) {
+        console.error("swc:");
+        errors.forEach(function (e) {
+            console.error("  " + e);
+        });
+        process.exit(2);
+    }
+
+    const opts = commander.opts();
+
+    const parser: ParserConfig = !!opts.typescript ?
+        {
+            syntax: "typescript"
+        }
+        :
+        {
+            syntax: "ecmascript",
+        };
+    let swcOptions: Config = {
+        jsc: {
+            parser,
+            transform: {},
+        },
+    };
+    let cliOptions: CliOptions = {
+        outDir: opts.outDir,
+        filenames,
+        extensions: opts.extensions,
+        keepFileExtension: opts.keepFileExtension,
+        verbose: !!opts.verbose,
+        watch: !!opts.watch,
+        relative: !!opts.relative,
+        copyFiles: !!opts.copyFiles,
+        includeDotfiles: !!opts.includeDotfiles,
+        deleteDirOnStart: !!opts.deleteDirOnStart,
+    };
+
+    return {
+        swcOptions,
+        cliOptions,
+    }
+}

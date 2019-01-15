@@ -31,7 +31,7 @@ export function readdirForCompilable(
     dirname: string,
     includeDotfiles: boolean,
     altExts?: Array<string>,
-) {
+): string[] {
     return readdir(dirname, includeDotfiles, function (filename) {
         return isCompilableExtension(filename, altExts);
     });
@@ -53,7 +53,24 @@ export function addSourceMappingUrl(code: string, loc: string) {
     return code + "\n//# sourceMappingURL=" + path.basename(loc);
 }
 
-export function compile(filename: string, opts: swc.Config): Promise<swc.Output> {
+export function transform(filename: string, code: string, opts: swc.Options): Promise<swc.Output> {
+    opts = {
+        filename,
+        ...opts,
+    };
+
+    return new Promise((resolve, reject) => {
+        try {
+            const output = swc.transformSync(code, opts)
+            return resolve(output)
+        } catch (e) {
+            reject(e)
+        }
+
+    })
+}
+
+export function compile(filename: string, opts: swc.Options): Promise<swc.Output> {
     opts = {
         ...opts,
     };

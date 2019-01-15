@@ -42,6 +42,21 @@ commander.option(
 
 commander.option("-w, --watch", "Recompile files on changes");
 
+// General source map formatting.
+commander.option("-s, --source-maps [true|false|inline|both]", "", booleanify);
+commander.option(
+    "--source-map-target [string]",
+    "set `file` on returned source map",
+);
+commander.option(
+    "--source-file-name [string]",
+    "set `sources[0]` on returned source map",
+);
+commander.option(
+    "--source-root [filename]",
+    "the root from which all sources are relative",
+);
+
 
 commander.option(
     "-o, --out-file [out]",
@@ -65,6 +80,19 @@ commander.version(pkg.version);
 commander.usage("[options] <files ...>");
 
 
+
+function booleanify(val: any): boolean | any {
+    if (val === "true" || val == 1) {
+        return true;
+    }
+
+    if (val === "false" || val == 0 || !val) {
+        return false;
+    }
+
+    return val;
+}
+
 function collect(value: any, previousValue: any): Array<string> {
     // If the user passed the option with no value, like "babel file.js --presets", do nothing.
     if (typeof value !== "string") return previousValue;
@@ -76,6 +104,11 @@ function collect(value: any, previousValue: any): Array<string> {
 
 export interface CliOptions {
     readonly outDir: string;
+    readonly outFile: string;
+
+    readonly sourceMapTarget: string;
+
+    readonly filename: string;
     readonly filenames: string[];
     readonly extensions: string[];
     readonly keepFileExtension: boolean;
@@ -159,7 +192,10 @@ export default function parserArgs(args: string[]) {
     };
     let cliOptions: CliOptions = {
         outDir: opts.outDir,
+        outFile: opts.outFile,
+        filename: opts.filename,
         filenames,
+        sourceMapTarget: opts.sourceMapTarget,
         extensions: opts.extensions,
         keepFileExtension: opts.keepFileExtension,
         verbose: !!opts.verbose,

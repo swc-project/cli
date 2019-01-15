@@ -27,9 +27,10 @@
   },
   "homepage": "https://github.com/swc-project/cli#readme",
   "peerDependencies": {
-    "swc": ">=1.0.0-beta.11"
+    "swc": ">=1.0.0-beta.17"
   },
   "devDependencies": {
+    "@types/convert-source-map": "^1.5.1",
     "@types/fs-readdir-recursive": "^1.0.0",
     "@types/glob": "^7.1.1",
     "@types/lodash": "^4.14.119",
@@ -37,7 +38,7 @@
     "@types/node": "^10.12.18",
     "@types/slash": "^2.0.0",
     "jest": "^23.6.0",
-    "swc": "^1.0.0-beta.11",
+    "swc": "^1.0.0-beta.17",
     "typescript": "^3.2.2"
   },
   "dependencies": {

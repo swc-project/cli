@@ -81,3 +81,5 @@ typings/
 
 lib/
 out/
+
+package-lock.json

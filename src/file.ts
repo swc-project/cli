@@ -10,12 +10,9 @@ import fs from "fs";
 import * as util from "./util";
 import { CliOptions } from "./options";
 
-export default async function ({
-    cliOptions,
-    swcOptions,
-}: {
+export default async function ({ cliOptions, swcOptions }: {
     cliOptions: CliOptions,
-    swcOptions: swc.Options
+    swcOptions: swc.Options,
 }) {
     function buildResult(fileResults: (swc.Output | null)[]) {
         const map = new sourceMap.SourceMapGenerator({

@@ -18,10 +18,10 @@ commander.option(
     "Defaults to the value of SWC_ENV, or else NODE_ENV, or else 'development'.",
 );
 
-commander.option(
-    "--typescript",
-    "Treat input as typescript",
-);
+// commander.option(
+//     "--typescript",
+//     "Treat input as typescript",
+// );
 
 // Basic file input configuration.
 commander.option(
@@ -176,17 +176,9 @@ export default function parserArgs(args: string[]) {
 
     const opts = commander.opts();
 
-    const parser: ParserConfig = !!opts.typescript ?
-        {
-            syntax: "typescript"
-        }
-        :
-        {
-            syntax: "ecmascript",
-        };
     let swcOptions: Config = {
         jsc: {
-            parser,
+            parser: undefined,
             transform: {},
         },
     };

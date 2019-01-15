@@ -26,7 +26,6 @@ export default async function ({ cliOptions, swcOptions }: { cliOptions: CliOpti
         const dest = getDest(relative, base);
 
         try {
-            console.info('compiling', src);
             const res = await util.compile(
                 src,
                 defaults(
@@ -128,7 +127,7 @@ export default async function ({ cliOptions, swcOptions }: { cliOptions: CliOpti
     console.log(
         `Successfully compiled ${compiledFiles} ${
         compiledFiles !== 1 ? "files" : "file"
-        } with Babel.`,
+        } with swc.`,
     );
 
     if (cliOptions.watch) {

@@ -49,5 +49,8 @@
     "mkdirp": "^0.5.1",
     "output-file-sync": "^2.0.1",
     "slash": "^2.0.0"
+  },
+  "bin": {
+    "swc": "./bin/swc.js"
   }
 }

@@ -198,6 +198,8 @@ export default async function ({ cliOptions, swcOptions }: {
     }
 
     async function files(filenames: string[]) {
+        await walk(filenames);
+
         if (cliOptions.watch) {
             const chokidar = util.requireChokidar();
             chokidar

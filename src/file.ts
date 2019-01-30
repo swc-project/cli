@@ -1,7 +1,7 @@
 import convertSourceMap from "convert-source-map";
 import defaults from "lodash/defaults";
 // @ts-ignore
-import sourceMap from "source-map";
+import sourceMap, { SourceMapGenerator } from "source-map";
 import slash from "slash";
 import swc from "swc";
 import path from "path";
@@ -14,7 +14,10 @@ export default async function ({ cliOptions, swcOptions }: {
     cliOptions: CliOptions,
     swcOptions: swc.Options,
 }) {
-    function buildResult(fileResults: (swc.Output | null)[]) {
+    async function buildResult(fileResults: (swc.Output | null)[]): Promise<{
+        code: string, map:
+        SourceMapGenerator
+    }> {
         const map = new sourceMap.SourceMapGenerator({
             file: cliOptions.sourceMapTarget ||
                 path.basename(cliOptions.outFile || "") ||
@@ -31,7 +34,7 @@ export default async function ({ cliOptions, swcOptions }: {
             code += result.code + "\n";
 
             if (result.map) {
-                const consumer = new sourceMap.SourceMapConsumer(result.map);
+                const consumer = await new sourceMap.SourceMapConsumer(result.map);
                 const sources = new Set();
 
                 consumer.eachMapping(function (mapping: any) {
@@ -43,6 +46,7 @@ export default async function ({ cliOptions, swcOptions }: {
                             column: mapping.generatedColumn,
                         },
                         source: mapping.source,
+                        // @ts-ignore
                         original:
                             mapping.source == null
                                 ? null
@@ -79,8 +83,8 @@ export default async function ({ cliOptions, swcOptions }: {
         };
     }
 
-    function output(fileResults: (swc.Output | null)[]) {
-        const result = buildResult(fileResults);
+    async function output(fileResults: (swc.Output | null)[]): Promise<void> {
+        const result = await buildResult(fileResults);
 
         if (cliOptions.outFile) {
             // we've requested for a sourcemap to be written to disk

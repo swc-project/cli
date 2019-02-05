@@ -39,15 +39,16 @@ export default async function ({ cliOptions, swcOptions }: { cliOptions: CliOpti
             if (!res) return false;
 
             let code = res.code;
-            let map = JSON.parse(res.map);
             // we've requested explicit sourcemaps to be written to disk
             if (res.map) {
+                let map = JSON.parse(res.map);
+
                 // TODO: Handle inline source map
 
                 const mapLoc = dest + ".map";
                 code = util.addSourceMappingUrl(code, mapLoc);
                 map.file = path.basename(relative);
-                outputFileSync(mapLoc, JSON.stringify(res.map));
+                outputFileSync(mapLoc, JSON.stringify(map));
             }
 
             outputFileSync(dest, code);

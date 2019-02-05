@@ -1,6 +1,6 @@
 {
   "name": "swc-cli",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "CLI for the swc project",
   "main": "index.js",
   "scripts": {
@@ -27,7 +27,7 @@
   },
   "homepage": "https://github.com/swc-project/cli#readme",
   "peerDependencies": {
-    "swc": ">=1.0.0-beta.22"
+    "swc": ">=1.0.0-beta.29"
   },
   "devDependencies": {
     "@types/convert-source-map": "^1.5.1",
@@ -38,7 +38,7 @@
     "@types/node": "^10.12.18",
     "@types/slash": "^2.0.0",
     "jest": "^23.6.0",
-    "swc": "^1.0.0-beta.22",
+    "swc": "^1.0.0-beta.29",
     "typescript": "^3.2.2"
   },
   "dependencies": {

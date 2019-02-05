@@ -3,5 +3,8 @@
         "parser": {
             "syntax": "typescript"
         }
+    },
+    "module": {
+        "type": "commonjs"
     }
 }

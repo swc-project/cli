@@ -59,31 +59,14 @@ export function transform(filename: string, code: string, opts: swc.Options): Pr
         ...opts,
     };
 
-    return new Promise((resolve, reject) => {
-        try {
-            const output = swc.transformSync(code, opts)
-            return resolve(output)
-        } catch (e) {
-            reject(e)
-        }
-
-    })
+    return swc.transform(code, opts)
 }
 
 export function compile(filename: string, opts: swc.Options): Promise<swc.Output> {
     opts = {
         ...opts,
     };
-
-    return new Promise((resolve, reject) => {
-        try {
-            const output = swc.transformFileSync(filename, opts)
-            return resolve(output)
-        } catch (e) {
-            reject(e)
-        }
-
-    });
+    return swc.transformFile(filename, opts)
 }
 
 export function deleteDir(path: fs.PathLike) {

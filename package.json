@@ -1,6 +1,6 @@
 {
   "name": "swc-cli",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "description": "CLI for the swc project",
   "main": "index.js",
   "scripts": {
@@ -46,7 +46,6 @@
     "convert-source-map": "^1.6.0",
     "fs-readdir-recursive": "^1.1.0",
     "glob": "^7.1.3",
-    "loadsh": "^0.0.3",
     "lodash": "^4.17.11",
     "mkdirp": "^0.5.1",
     "output-file-sync": "^2.0.1",

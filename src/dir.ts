@@ -5,7 +5,7 @@ import { sync as mkdirpSync } from "mkdirp";
 import slash from "slash";
 import path from "path";
 import fs from "fs";
-import * as swc from 'swc';
+import * as swc from '@swc/core';
 
 import * as util from "./util";
 import { CliOptions } from "./options";

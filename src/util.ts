@@ -1,5 +1,5 @@
 import readdirRecursive from "fs-readdir-recursive";
-import * as swc from "swc";
+import * as swc from "@swc/core";
 import includes from "lodash/includes";
 import path from "path";
 import fs from "fs";

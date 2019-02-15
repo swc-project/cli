@@ -1,7 +1,7 @@
 import commander from 'commander';
 import uniq from "lodash/uniq";
 import glob from "glob";
-import { Config, JscConfig, ParserConfig } from 'swc';
+import { Config, JscConfig, ParserConfig } from '@swc/core';
 import pkg from "../package.json";
 
 
@@ -76,7 +76,7 @@ commander.option(
     "Include dotfiles when compiling and copying non-compilable files",
 );
 
-commander.version(pkg.version);
+commander.version(`CLI: ${pkg.version}`);
 commander.usage("[options] <files ...>");
 
 

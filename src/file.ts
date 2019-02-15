@@ -3,7 +3,7 @@ import defaults from "lodash/defaults";
 // @ts-ignore
 import sourceMap, { SourceMapGenerator } from "source-map";
 import slash from "slash";
-import swc from "swc";
+import swc from "@swc/core";
 import path from "path";
 import fs from "fs";
 

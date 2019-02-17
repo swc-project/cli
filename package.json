@@ -30,6 +30,7 @@
     "@swc/core": ">=1.0.12"
   },
   "devDependencies": {
+    "@swc/core": "^1.0.12",
     "@types/convert-source-map": "^1.5.1",
     "@types/fs-readdir-recursive": "^1.0.0",
     "@types/glob": "^7.1.1",
@@ -37,8 +38,7 @@
     "@types/mkdirp": "^0.5.2",
     "@types/node": "^10.12.18",
     "@types/slash": "^2.0.0",
-    "jest": "^23.6.0",
-    "@swc/core": "^1.0.12",
+    "jest": "^24.1.0",
     "typescript": "^3.2.2"
   },
   "dependencies": {

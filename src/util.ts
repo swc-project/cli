@@ -44,7 +44,7 @@ export function isCompilableExtension(
     filename: string,
     altExts?: Array<string>,
 ): boolean {
-    const exts = altExts || [".js", ".jsx", ".es6", ".es", ".mjs", ".ts"];
+    const exts = altExts || [".js", ".jsx", ".es6", ".es", ".mjs", ".ts", ".tsx"];
     const ext = path.extname(filename);
     return includes(exts, ext);
 }

@@ -99,12 +99,12 @@ export default async function ({ cliOptions, swcOptions }: { cliOptions: CliOpti
             let count = 0;
 
             const files = util.readdir(dirname, cliOptions.includeDotfiles);
-            for (const filename of files) {
-                const src = path.join(dirname, filename);
 
+            await Promise.all(files.map(async (filename: string) => {
+                const src = path.join(dirname, filename);
                 const written = await handleFile(src, dirname);
                 if (written) count += 1;
-            }
+            }));
 
             return count;
         } else {

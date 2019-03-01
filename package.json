@@ -1,6 +1,6 @@
 {
   "name": "@swc/cli",
-  "version": "0.1.15",
+  "version": "0.1.16",
   "description": "CLI for the swc project",
   "main": "index.js",
   "scripts": {
@@ -27,10 +27,10 @@
   },
   "homepage": "https://github.com/swc-project/cli#readme",
   "peerDependencies": {
-    "@swc/core": ">=1.0.12"
+    "@swc/core": ">=1.0.31"
   },
   "devDependencies": {
-    "@swc/core": "^1.0.12",
+    "@swc/core": "^1.0.31",
     "@types/convert-source-map": "^1.5.1",
     "@types/fs-readdir-recursive": "^1.0.0",
     "@types/glob": "^7.1.1",

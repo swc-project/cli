@@ -1,7 +1,7 @@
 import commander from 'commander';
 import uniq from "lodash/uniq";
 import glob from "glob";
-import { Config, version as swcCoreVersion } from "@swc/core";
+import { Options, version as swcCoreVersion } from "@swc/core";
 import pkg from "../package.json";
 
 
@@ -180,11 +180,15 @@ export default function parserArgs(args: string[]) {
 
     const opts = commander.opts();
 
-    let swcOptions: Config = {
+    let swcOptions: Options = {
         jsc: {
             parser: undefined,
             transform: {},
         },
+
+        filename: opts.filename,
+        sourceMaps: opts.sourceMaps,
+        configFile: opts.configFile,
     };
     let cliOptions: CliOptions = {
         outDir: opts.outDir,

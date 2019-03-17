@@ -185,11 +185,11 @@ export default function parserArgs(args: string[]) {
             parser: undefined,
             transform: {},
         },
-
-        filename: opts.filename,
+        // filename,
         sourceMaps: opts.sourceMaps,
         configFile: opts.configFile,
     };
+
     let cliOptions: CliOptions = {
         outDir: opts.outDir,
         outFile: opts.outFile,

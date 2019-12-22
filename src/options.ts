@@ -217,7 +217,6 @@ export default function parserArgs(args: string[]) {
 
         obj[ks[ks.length - 1]] = value
     }
-    console.log(swcOptions)
 
 
 

@@ -4,7 +4,6 @@ import glob from "glob";
 import { Options, version as swcCoreVersion } from "@swc/core";
 import pkg from "../package.json";
 
-
 // Standard swc input configs.
 commander.option(
     "-f, --filename [filename]",
@@ -74,6 +73,12 @@ commander.option(
 commander.option(
     "--include-dotfiles",
     "Include dotfiles when compiling and copying non-compilable files",
+);
+
+commander.option(
+    "-C, --config <config>",
+    "Override a config from .swcrc file. e.g. -C module.type=amd -C module.moduleId=hello",
+    collect,
 );
 
 commander.version(
@@ -189,6 +194,32 @@ export default function parserArgs(args: string[]) {
         sourceMaps: opts.sourceMaps,
         configFile: opts.configFile,
     };
+
+    for (const cfg of opts.config as string[]) {
+        const i = cfg.indexOf('=');
+        let key, value: any;
+        if (i === -1) {
+            key = cfg;
+            value = true;
+        } else {
+            key = cfg.substring(0, i);
+            value = cfg.substring(i + 1);
+        }
+
+        let obj: any = swcOptions;
+        const ks = key.split('.');
+        for (const k of ks.slice(0, ks.length - 1)) {
+            if (!obj[k]) {
+                obj[k] = {}
+            }
+            obj = obj[k];
+        }
+
+        obj[ks[ks.length - 1]] = value
+    }
+    console.log(swcOptions)
+
+
 
     let cliOptions: CliOptions = {
         outDir: opts.outDir,

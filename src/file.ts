@@ -58,9 +58,9 @@ export default async function ({ cliOptions, swcOptions }: {
                 });
 
                 sources.forEach(source => {
-                    const content = consumer.sourceContentFor(source, true);
+                    const content = consumer.sourceContentFor(source as any, true);
                     if (content !== null) {
-                        map.setSourceContent(source, content);
+                        map.setSourceContent(source as any, content);
                     }
                 });
 

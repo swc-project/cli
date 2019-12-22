@@ -1,9 +1,10 @@
 {
   "name": "@swc/cli",
-  "version": "0.1.18",
+  "version": "0.1.19",
   "description": "CLI for the swc project",
   "main": "index.js",
   "scripts": {
+    "prepublish": "tsc",
     "test": "jest"
   },
   "repository": {
@@ -20,7 +21,7 @@
     "compiler",
     "javascript"
   ],
-  "author": "강동윤 <kdy1@outlook.kr>",
+  "author": "강동윤 <kdy1997.dev@gmail.com>",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/swc-project/cli/issues"

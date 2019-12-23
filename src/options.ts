@@ -195,29 +195,31 @@ export default function parserArgs(args: string[]) {
         configFile: opts.configFile,
     };
 
-    for (const cfg of opts.config as string[]) {
-        const i = cfg.indexOf('=');
-        let key, value: any;
-        if (i === -1) {
-            key = cfg;
-            value = true;
-        } else {
-            key = cfg.substring(0, i);
-            value = cfg.substring(i + 1);
-        }
-
-        let obj: any = swcOptions;
-        const ks = key.split('.');
-        for (const k of ks.slice(0, ks.length - 1)) {
-            if (!obj[k]) {
-                obj[k] = {}
+    if (opts.config) {
+        for (const cfg of opts.config as string[]) {
+            const i = cfg.indexOf('=');
+            let key, value: any;
+            if (i === -1) {
+                key = cfg;
+                value = true;
+            } else {
+                key = cfg.substring(0, i);
+                value = cfg.substring(i + 1);
             }
-            obj = obj[k];
+
+            let obj: any = swcOptions;
+            const ks = key.split('.');
+            for (const k of ks.slice(0, ks.length - 1)) {
+                if (!obj[k]) {
+                    obj[k] = {}
+                }
+                obj = obj[k];
+            }
+
+            obj[ks[ks.length - 1]] = value
         }
 
-        obj[ks[ks.length - 1]] = value
     }
-
 
 
     let cliOptions: CliOptions = {

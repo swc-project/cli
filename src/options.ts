@@ -78,6 +78,12 @@ commander.option(
   collect
 );
 
+commander.option(
+  "--sync",
+  "Invoke swc synchronously. Useful for debugging.",
+  collect
+);
+
 commander.version(
   `@swc/cli: ${pkg.version}
 @swc/core: ${swcCoreVersion}`
@@ -109,6 +115,10 @@ function collect(value: any, previousValue: any): Array<string> {
 export interface CliOptions {
   readonly outDir: string;
   readonly outFile: string;
+  /**
+   * Invoke swc using transformSync. It's useful for debugging.
+   */
+  readonly sync: boolean;
 
   readonly sourceMapTarget: string;
 
@@ -216,6 +226,7 @@ export default function parserArgs(args: string[]) {
     outFile: opts.outFile,
     filename: opts.filename,
     filenames,
+    sync: !!opts.sync,
     sourceMapTarget: opts.sourceMapTarget,
     extensions: opts.extensions,
     keepFileExtension: opts.keepFileExtension,

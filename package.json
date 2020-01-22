@@ -31,7 +31,7 @@
     "@swc/core": ">=1.0.31"
   },
   "devDependencies": {
-    "@swc/core": "^1.1.10",
+    "@swc/core": "^1.1.13",
     "@types/convert-source-map": "^1.5.1",
     "@types/fs-readdir-recursive": "^1.0.0",
     "@types/glob": "^7.1.1",

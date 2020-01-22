@@ -39,7 +39,8 @@ export default async function({
             sourceFileName: slash(path.relative(dest + "/..", src))
           },
           swcOptions
-        )
+        ),
+        cliOptions.sync
       );
 
       if (!res) return false;

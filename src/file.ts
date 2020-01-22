@@ -135,7 +135,8 @@ export default async function({
           sourceFileName: "stdin"
         },
         swcOptions
-      )
+      ),
+      cliOptions.sync
     );
 
     output([res]);
@@ -191,7 +192,8 @@ export default async function({
                     : swcOptions.sourceMaps
               },
               swcOptions
-            )
+            ),
+            cliOptions.sync
           );
         } catch (err) {
           if (!cliOptions.watch) {

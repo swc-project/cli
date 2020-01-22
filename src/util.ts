@@ -58,26 +58,37 @@ export function addSourceMappingUrl(code: string, loc: string) {
   return code + "\n//# sourceMappingURL=" + path.basename(loc);
 }
 
-export function transform(
+export async function transform(
   filename: string,
   code: string,
-  opts: swc.Options
+  opts: swc.Options,
+  sync: boolean
 ): Promise<swc.Output> {
   opts = {
     filename,
     ...opts
   };
 
+  if (sync) {
+    return swc.transformSync(code, opts);
+  }
+
   return swc.transform(code, opts);
 }
 
-export function compile(
+export async function compile(
   filename: string,
-  opts: swc.Options
+  opts: swc.Options,
+  sync: boolean
 ): Promise<swc.Output> {
   opts = {
     ...opts
   };
+
+  if (sync) {
+    return swc.transformFileSync(filename, opts);
+  }
+
   return swc.transformFile(filename, opts);
 }
 

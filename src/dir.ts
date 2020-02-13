@@ -97,7 +97,6 @@ export default async function({
 
   async function handle(filenameOrDir: string) {
     if (!fs.existsSync(filenameOrDir)) return 0;
-
     const stat = fs.statSync(filenameOrDir);
 
     if (stat.isDirectory()) {
@@ -110,8 +109,10 @@ export default async function({
       await Promise.all(
         files.map(async (filename: string) => {
           const src = path.join(dirname, filename);
-          const written = await handleFile(src, dirname);
-          if (written) count += 1;
+          try {
+            const written = await handleFile(src, dirname);
+            if (written) count += 1;
+          } catch (e) {}
         })
       );
 

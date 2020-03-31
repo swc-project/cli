@@ -169,7 +169,7 @@ export default function parserArgs(args: string[]) {
     !commander.outDir &&
     filenames.length === 0 &&
     typeof commander.filename !== "string" &&
-    commander.babelrc !== false
+    commander.swcrc !== false
   ) {
     errors.push(
       "stdin compilation requires either -f/--filename [filename] or --no-swcrc"

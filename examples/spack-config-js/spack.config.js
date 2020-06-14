@@ -1,6 +1,7 @@
-console.log('foo!');
+const { config } = require('@swc/core/spack')
 
-module.exports = {
+
+module.exports = config({
     entry: {
         'web': __dirname + '/src/web.ts',
         'android': __dirname + '/src/android.ts',
@@ -8,5 +9,5 @@ module.exports = {
     output: {
         path: __dirname + '/lib'
     },
-    module: {}
-}
+    module: {},
+});

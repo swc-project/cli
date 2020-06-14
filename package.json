@@ -28,10 +28,10 @@
   },
   "homepage": "https://github.com/swc-project/cli#readme",
   "peerDependencies": {
-    "@swc/core": "^1.2.1"
+    "@swc/core": "^1.2.2"
   },
   "devDependencies": {
-    "@swc/core": "^1.2.1",
+    "@swc/core": "^1.2.2",
     "@types/commander": "^2.12.2",
     "@types/convert-source-map": "^1.5.1",
     "@types/fs-readdir-recursive": "^1.0.0",

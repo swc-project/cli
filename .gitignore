@@ -83,3 +83,4 @@ lib/
 out/
 
 package-lock.json
+*.lock

@@ -1,8 +1,12 @@
 import { version as swcCoreVersion } from "@swc/core";
 import { BundleOptions, compileBundleOptions } from "@swc/core/spack";
-import commander, { command } from "commander";
+import commander from "commander";
+import * as path from 'path';
 
 import pkg from "../../package.json";
+import { prepare } from 'rechoir'
+import { extensions } from './extensions';
+
 
 export interface SpackCliOptions {
     // watch: boolean
@@ -169,7 +173,6 @@ export default async function parseSpackArgs(args: string[]): Promise<{
     //
     const cmd = commander.parse(args);
     const opts = cmd.opts();
-    console.log(opts)
 
     const cliOptions: SpackCliOptions = {
         // watch: !!opts.watch,

@@ -83,3 +83,5 @@ src/
 out/
 
 package-lock.json
+
+exmaples/

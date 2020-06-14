@@ -9,9 +9,6 @@ import { extensions } from './extensions';
 
 
 export interface SpackCliOptions {
-    // watch: boolean
-    output: string
-    outputPath: string
     debug: boolean
 }
 
@@ -176,18 +173,28 @@ export default async function parseSpackArgs(args: string[]): Promise<{
 
     const cliOptions: SpackCliOptions = {
         // watch: !!opts.watch,
-        output: opts.output ?? '',
-        outputPath: opts.outputPath ?? '.',
         debug: !!opts.debug,
     };
 
-    const configOpts: any = await compileBundleOptions(opts.config ?? path.resolve('spack.config.js'));
+    const configOpts: BundleOptions = await compileBundleOptions(opts.config ?? path.resolve('spack.config.js')) as any;
     if (opts.entry) {
-        configOpts.enrry = opts.entry;
+        configOpts.entry = opts.entry;
     }
     if (opts.mode) {
         configOpts.mode = opts.mode;
     }
+    if (!configOpts.output) {
+        configOpts.output = {} as any;
+    }
+    if (!configOpts.output.path) {
+        configOpts.output.path = opts.outputPath ?? '[name].js';
+    }
+    if (!configOpts.output.name) {
+        configOpts.output.name = opts.output ?? '[name].js';
+    }
+    // if (!configOpts.output.name) {
+    //     configOpts.output.path = opts.outputPath;
+    // }
 
     return {
         cliOptions,

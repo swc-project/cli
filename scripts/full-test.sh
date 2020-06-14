@@ -2,9 +2,9 @@
 
 set -eu
 
-(cd ~/projects/kdy1-swc && npx neon build && npx tsc -d) 
+# (cd ~/projects/kdy1-swc && npx neon build && npx tsc -d) 
 
-npm link @swc/core
+# npm link @swc/core
 
 npx tsc -d
 

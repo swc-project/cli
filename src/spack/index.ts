@@ -1,9 +1,10 @@
 import { bundle } from '@swc/core';
-import { relative, join, dirname } from 'path'
-import parseSpackArgs from './options';
-import { writeFile, mkdir } from 'fs';
-import { promisify } from 'util';
+import { mkdir, writeFile } from 'fs';
 import { findLastIndex } from 'lodash';
+import { basename, dirname, extname, join, relative } from 'path'
+import { promisify } from 'util';
+
+import parseSpackArgs from './options';
 
 const write = promisify(writeFile);
 const makeDir = promisify(mkdir);
@@ -40,12 +41,13 @@ const makeDir = promisify(mkdir);
             await Object.keys(output).map(async (name) => {
                 if (isUserDefinedEntry(name)) {
                     const fullPath = join(spackOptions.output.path, spackOptions.output.name.replace('[name]', name));
-                    ``
                     await makeDir(dirname(fullPath), { recursive: true });
                     await write(fullPath, output[name].code, 'utf-8');
                 } else {
+                    const ext = extname(name);
+                    const base = basename(name, ext);
                     const filename = relative(process.cwd(), name);
-                    const fullPath = join(spackOptions.output.path, filename)
+                    const fullPath = join(spackOptions.output.path, dirname(filename), `${base}.js`)
 
                     await makeDir(dirname(fullPath), { recursive: true });
                     await write(fullPath, output[name].code, 'utf-8');

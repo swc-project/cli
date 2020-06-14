@@ -3,7 +3,7 @@ import commander from "commander";
 import glob from "glob";
 import uniq from "lodash/uniq";
 
-import pkg from "../package.json";
+import pkg from "../../package.json";
 
 // Standard swc input configs.
 commander.option(
@@ -15,7 +15,7 @@ commander.option("--config-file [path]", "Path to a .swcrc file to use");
 commander.option(
   "--env-name [name]",
   "The name of the 'env' to use when loading configs and plugins. " +
-    "Defaults to the value of SWC_ENV, or else NODE_ENV, or else 'development'."
+  "Defaults to the value of SWC_ENV, or else NODE_ENV, or else 'development'."
 );
 
 // commander.option(
@@ -140,7 +140,7 @@ export default function parserArgs(args: string[]) {
 
   const errors = [];
 
-  let filenames = commander.args.reduce(function(globbed: string[], input) {
+  let filenames = commander.args.reduce(function (globbed: string[], input) {
     let files = glob.sync(input);
     if (!files.length) files = [input];
     return globbed.concat(files);
@@ -178,7 +178,7 @@ export default function parserArgs(args: string[]) {
 
   if (errors.length) {
     console.error("swc:");
-    errors.forEach(function(e) {
+    errors.forEach(function (e) {
       console.error("  " + e);
     });
     process.exit(2);

@@ -10,7 +10,7 @@ import { CliOptions } from "./options";
 import * as util from "./util";
 
 // @ts-ignore
-export default async function({
+export default async function ({
   cliOptions,
   swcOptions
 }: {
@@ -43,7 +43,7 @@ export default async function({
         const consumer = await new sourceMap.SourceMapConsumer(result.map);
         const sources = new Set();
 
-        consumer.eachMapping(function(mapping: any) {
+        consumer.eachMapping(function (mapping: any) {
           if (mapping.source != null) sources.add(mapping.source);
 
           map.addMapping({
@@ -57,9 +57,9 @@ export default async function({
               mapping.source == null
                 ? null
                 : {
-                    line: mapping.originalLine,
-                    column: mapping.originalColumn
-                  }
+                  line: mapping.originalLine,
+                  column: mapping.originalColumn
+                }
           });
         });
 
@@ -112,12 +112,12 @@ export default async function({
 
       process.stdin.setEncoding("utf8");
 
-      process.stdin.on("readable", function() {
+      process.stdin.on("readable", function () {
         const chunk = process.stdin.read();
         if (chunk !== null) code += chunk;
       });
 
-      process.stdin.on("end", function() {
+      process.stdin.on("end", function () {
         resolve(code);
       });
       process.stdin.on("error", reject);
@@ -145,7 +145,7 @@ export default async function({
   async function walk(filenames: string[]) {
     const _filenames: string[] = [];
 
-    filenames.forEach(function(filename) {
+    filenames.forEach(function (filename) {
       if (!fs.existsSync(filename)) return;
 
       const stat = fs.statSync(filename);
@@ -158,7 +158,7 @@ export default async function({
             cliOptions.includeDotfiles,
             cliOptions.extensions
           )
-          .forEach(function(filename: string) {
+          .forEach(function (filename: string) {
             _filenames.push(path.join(dirname, filename));
           });
       } else {
@@ -167,7 +167,7 @@ export default async function({
     });
 
     const results = await Promise.all(
-      _filenames.map(async function(filename) {
+      _filenames.map(async function (filename) {
         let sourceFilename = filename;
         if (cliOptions.outFile) {
           sourceFilename = path.relative(
@@ -223,7 +223,7 @@ export default async function({
             pollInterval: 10
           }
         })
-        .on("all", function(type: string, filename: string) {
+        .on("all", function (type: string, filename: string) {
           if (!util.isCompilableExtension(filename, cliOptions.extensions)) {
             return;
           }

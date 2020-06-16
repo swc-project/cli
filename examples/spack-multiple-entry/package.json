@@ -1,0 +1,16 @@
+{
+  "name": "spack-multiple-entry",
+  "private": true,
+  "version": "1.0.0",
+  "main": "lib/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@swc/cli": "file:../.."
+  }
+}

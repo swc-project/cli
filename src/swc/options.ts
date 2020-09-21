@@ -39,6 +39,8 @@ commander.option(
 
 commander.option("-w, --watch", "Recompile files on changes");
 
+commander.option("-q, --quiet", "Suppress compilation output");
+
 // General source map formatting.
 commander.option("-s, --source-maps [true|false|inline|both]", "", booleanify);
 commander.option(
@@ -132,6 +134,7 @@ export interface CliOptions {
   readonly copyFiles: boolean;
   readonly includeDotfiles: boolean;
   readonly deleteDirOnStart: boolean;
+  readonly quiet: boolean;
 }
 
 export default function parserArgs(args: string[]) {
@@ -235,7 +238,8 @@ export default function parserArgs(args: string[]) {
     relative: !!opts.relative,
     copyFiles: !!opts.copyFiles,
     includeDotfiles: !!opts.includeDotfiles,
-    deleteDirOnStart: !!opts.deleteDirOnStart
+    deleteDirOnStart: !!opts.deleteDirOnStart,
+    quiet: !!opts.quiet
   };
 
   return {

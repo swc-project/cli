@@ -10,7 +10,7 @@ import * as swc from "@swc/core";
 import * as util from "./util";
 import { CliOptions } from "./options";
 
-export default async function({
+export default async function ({
   cliOptions,
   swcOptions
 }: {
@@ -112,7 +112,7 @@ export default async function({
           try {
             const written = await handleFile(src, dirname);
             if (written) count += 1;
-          } catch (e) {}
+          } catch (e) { }
         })
       );
 
@@ -135,16 +135,17 @@ export default async function({
     compiledFiles += await handle(filename);
   }
 
-  console.log(
-    `Successfully compiled ${compiledFiles} ${
-      compiledFiles !== 1 ? "files" : "file"
-    } with swc.`
-  );
+  if (!cliOptions.quiet) {
+    console.log(
+      `Successfully compiled ${compiledFiles} ${compiledFiles !== 1 ? "files" : "file"
+      } with swc.`
+    );
+  }
 
   if (cliOptions.watch) {
     const chokidar = util.requireChokidar();
 
-    filenames.forEach(function(filenameOrDir) {
+    filenames.forEach(function (filenameOrDir) {
       const watcher = chokidar.watch(filenameOrDir, {
         persistent: true,
         ignoreInitial: true,
@@ -154,8 +155,8 @@ export default async function({
         }
       });
 
-      ["add", "change"].forEach(function(type) {
-        watcher.on(type, function(filename: string) {
+      ["add", "change"].forEach(function (type) {
+        watcher.on(type, function (filename: string) {
           handleFile(
             filename,
             filename === filenameOrDir

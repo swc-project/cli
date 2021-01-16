@@ -157,14 +157,23 @@ export default async function ({
 
       ["add", "change"].forEach(function (type) {
         watcher.on(type, function (filename: string) {
+          const start = process.hrtime()
+
           handleFile(
             filename,
             filename === filenameOrDir
               ? path.dirname(filenameOrDir)
               : filenameOrDir
-          ).catch(err => {
-            console.error(err);
-          });
+          )
+            .then(ok => {
+              if (cliOptions.logWatchCompilation && ok) {
+                const [seconds, nanoseconds] = process.hrtime(start);
+                const ms = (seconds * 1000000000 + nanoseconds) / 1000000;
+                const name = path.basename(filename);
+                console.log(`Compiled ${name} in ${ms.toFixed(2)}ms`);
+              }
+            })
+            .catch(console.error);
         });
       });
     });

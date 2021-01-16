@@ -86,6 +86,11 @@ commander.option(
   collect
 );
 
+commander.option(
+  "--log-watch-compilation",
+  "Log a message when a watched file is successfully compiled"
+);
+
 commander.version(
   `@swc/cli: ${pkg.version}
 @swc/core: ${swcCoreVersion}`
@@ -135,6 +140,7 @@ export interface CliOptions {
   readonly includeDotfiles: boolean;
   readonly deleteDirOnStart: boolean;
   readonly quiet: boolean;
+  readonly logWatchCompilation: boolean;
 }
 
 export default function parserArgs(args: string[]) {
@@ -166,6 +172,8 @@ export default function parserArgs(args: string[]) {
     if (!filenames.length) {
       errors.push("--watch requires filenames");
     }
+  } else if (commander.logWatchCompilation) {
+    errors.push("--log-watch-compilation requires --watch")
   }
 
   if (
@@ -239,7 +247,8 @@ export default function parserArgs(args: string[]) {
     copyFiles: !!opts.copyFiles,
     includeDotfiles: !!opts.includeDotfiles,
     deleteDirOnStart: !!opts.deleteDirOnStart,
-    quiet: !!opts.quiet
+    quiet: !!opts.quiet,
+    logWatchCompilation: !!opts.logWatchCompilation
   };
 
   return {

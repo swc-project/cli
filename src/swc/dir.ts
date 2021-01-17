@@ -95,14 +95,17 @@ export default async function ({
     return written;
   }
 
-  async function handle(filenameOrDir: string) {
-    if (!fs.existsSync(filenameOrDir)) return 0;
+  type HandleResult = { succeeded: number; failed: number }
+
+  async function handle(filenameOrDir: string): Promise<HandleResult> {
+    if (!fs.existsSync(filenameOrDir)) return { succeeded: 0, failed: 0 };
     const stat = fs.statSync(filenameOrDir);
 
     if (stat.isDirectory()) {
       const dirname = filenameOrDir;
 
-      let count = 0;
+      let succeeded = 0;
+      let failed = 0;
 
       const files = util.readdir(dirname, cliOptions.includeDotfiles);
 
@@ -111,17 +114,23 @@ export default async function ({
           const src = path.join(dirname, filename);
           try {
             const written = await handleFile(src, dirname);
-            if (written) count += 1;
-          } catch (e) { }
+            if (written) succeeded += 1;
+            else failed += 1;
+          } catch (e) {
+            failed += 1;
+          }
         })
       );
 
-      return count;
+      return { succeeded, failed };
     } else {
       const filename = filenameOrDir;
       const written = await handleFile(filename, path.dirname(filename));
 
-      return written ? 1 : 0;
+      return {
+        succeeded: written ? 1 : 0,
+        failed: written ? 0 : 1
+      };
     }
   }
 
@@ -131,15 +140,28 @@ export default async function ({
   mkdirpSync(cliOptions.outDir);
 
   let compiledFiles = 0;
+  let failedFiles = 0;
+
   for (const filename of cliOptions.filenames) {
-    compiledFiles += await handle(filename);
+    const { succeeded, failed } = await handle(filename);
+    compiledFiles += succeeded
+    failedFiles += failed
   }
 
   if (!cliOptions.quiet) {
-    console.log(
-      `Successfully compiled ${compiledFiles} ${compiledFiles !== 1 ? "files" : "file"
-      } with swc.`
-    );
+    if (compiledFiles > 0) {
+      console.log(
+        `Successfully compiled ${compiledFiles} ${compiledFiles !== 1 ? "files" : "file"
+        } with swc.`
+      );
+    }
+
+    if (failedFiles > 0) {
+      const error = `Failed to compile ${failedFiles} ${failedFiles !== 1 ? "files" : "file"
+        } with swc.`
+      if (!cliOptions.watch) throw new Error(error)
+      else console.error(error)
+    }
   }
 
   if (cliOptions.watch) {
@@ -157,14 +179,23 @@ export default async function ({
 
       ["add", "change"].forEach(function (type) {
         watcher.on(type, function (filename: string) {
+          const start = process.hrtime()
+
           handleFile(
             filename,
             filename === filenameOrDir
               ? path.dirname(filenameOrDir)
               : filenameOrDir
-          ).catch(err => {
-            console.error(err);
-          });
+          )
+            .then(ok => {
+              if (cliOptions.logWatchCompilation && ok) {
+                const [seconds, nanoseconds] = process.hrtime(start);
+                const ms = (seconds * 1000000000 + nanoseconds) / 1000000;
+                const name = path.basename(filename);
+                console.log(`Compiled ${name} in ${ms.toFixed(2)}ms`);
+              }
+            })
+            .catch(console.error);
         });
       });
     });

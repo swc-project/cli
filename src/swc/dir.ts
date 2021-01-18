@@ -1,14 +1,14 @@
+import * as swc from "@swc/core";
+import fs from "fs";
 import defaults from "lodash/defaults";
+import { sync as mkdirpSync } from "mkdirp";
 // @ts-ignore
 import outputFileSync from "output-file-sync";
-import { sync as mkdirpSync } from "mkdirp";
-import slash from "slash";
 import path from "path";
-import fs from "fs";
-import * as swc from "@swc/core";
+import slash from "slash";
 
-import * as util from "./util";
 import { CliOptions } from "./options";
+import * as util from "./util";
 
 export default async function ({
   cliOptions,
@@ -117,6 +117,7 @@ export default async function ({
             if (written) succeeded += 1;
             else failed += 1;
           } catch (e) {
+            console.error(e);
             failed += 1;
           }
         })

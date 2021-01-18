@@ -91,6 +91,13 @@ commander.option(
   "Log a message when a watched file is successfully compiled"
 );
 
+
+commander.option(
+  "--extensions",
+  "Use specific extensions",
+  collect
+);
+
 commander.version(
   `@swc/cli: ${pkg.version}
 @swc/core: ${swcCoreVersion}`

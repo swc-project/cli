@@ -19,11 +19,14 @@ export default async function ({
 }) {
   const filenames = cliOptions.filenames;
 
-  async function write(src: string, base: string) {
+  /**
+   * Returns `undefined` if a file is ignored.
+   */
+  async function write(src: string, base: string): Promise<boolean | undefined> {
     let relative = path.relative(base, src);
 
     if (!util.isCompilableExtension(relative, cliOptions.extensions)) {
-      return false;
+      return undefined;
     }
 
     // remove extension and then append back on .js
@@ -83,7 +86,10 @@ export default async function ({
     return path.join(cliOptions.outDir, filename);
   }
 
-  async function handleFile(src: string, base: string) {
+  /**
+   * Returns `undefined` if a file is ignored.
+   */
+  async function handleFile(src: string, base: string): Promise<boolean | undefined> {
     const written = await write(src, base);
 
     if (!written && cliOptions.copyFiles) {
@@ -114,8 +120,11 @@ export default async function ({
           const src = path.join(dirname, filename);
           try {
             const written = await handleFile(src, dirname);
-            if (written) succeeded += 1;
-            else failed += 1;
+            if (written) {
+              succeeded += 1;
+            } else if (written === false) {
+              failed += 1;
+            }
           } catch (e) {
             console.error(e);
             failed += 1;
@@ -130,7 +139,7 @@ export default async function ({
 
       return {
         succeeded: written ? 1 : 0,
-        failed: written ? 0 : 1
+        failed: written === false ? 1 : 0
       };
     }
   }

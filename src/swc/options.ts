@@ -93,7 +93,7 @@ commander.option(
 
 
 commander.option(
-  "--extensions",
+  "--extensions [list]",
   "Use specific extensions",
   collect
 );

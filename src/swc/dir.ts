@@ -1,5 +1,6 @@
 import * as swc from "@swc/core";
 import fs from "fs";
+import { ceil } from "lodash";
 import defaults from "lodash/defaults";
 import { sync as mkdirpSync } from "mkdirp";
 // @ts-ignore
@@ -90,7 +91,10 @@ export default async function ({
    * Returns `undefined` if a file is ignored.
    */
   async function handleFile(src: string, base: string): Promise<boolean | undefined> {
-    const written = await write(src, base);
+    const written = await write(src, base).catch(e => {
+      if (e?.toString().includes("ignored by .swcrc")) { return undefined }
+      throw e;
+    });
 
     if (!written && cliOptions.copyFiles) {
       const filename = path.relative(base, src);

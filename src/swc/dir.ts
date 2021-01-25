@@ -96,7 +96,7 @@ export default async function ({
       throw e;
     });
 
-    if (!written && cliOptions.copyFiles) {
+    if (written === false && cliOptions.copyFiles) {
       const filename = path.relative(base, src);
       const dest = getDest(filename, base);
       outputFileSync(dest, fs.readFileSync(src));

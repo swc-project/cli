@@ -3,10 +3,10 @@ import { BundleOptions, compileBundleOptions } from "@swc/core/spack";
 import commander from "commander";
 import * as path from 'path';
 
-import pkg from "../../package.json";
 import { prepare } from 'rechoir'
 import { extensions } from './extensions';
 
+const pkg = require("../../package.json");
 
 export interface SpackCliOptions {
     debug: boolean

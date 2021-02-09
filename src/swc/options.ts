@@ -3,7 +3,7 @@ import commander from "commander";
 import glob from "glob";
 import uniq from "lodash/uniq";
 
-import pkg from "../../package.json";
+const pkg = require("../../package.json");
 
 // Standard swc input configs.
 commander.option(

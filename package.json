@@ -62,5 +62,8 @@
   "bin": {
     "swc": "./bin/swc.js",
     "spack": "./bin/spack.js"
-  }
+  },
+  "files": [
+    "lib"
+  ]
 }

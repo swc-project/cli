@@ -2,9 +2,9 @@
   "name": "@swc/cli",
   "version": "0.1.34",
   "description": "CLI for the swc project",
-  "main": "index.js",
+  "main": "lib/swc/index.js",
   "scripts": {
-    "prepublish": "tsc",
+    "prepublish": "tsc -b tsconfig.build.json",
     "test": "jest"
   },
   "repository": {
@@ -62,5 +62,8 @@
   "bin": {
     "swc": "./bin/swc.js",
     "spack": "./bin/spack.js"
-  }
+  },
+  "files": [
+    "lib"
+  ]
 }

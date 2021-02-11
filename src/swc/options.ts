@@ -1,7 +1,6 @@
 import { Options, version as swcCoreVersion } from "@swc/core";
 import commander from "commander";
-import glob from "glob";
-import uniq from "lodash/uniq";
+import { set } from "lodash";
 
 const pkg = require("../../package.json");
 
@@ -42,7 +41,7 @@ commander.option("-w, --watch", "Recompile files on changes");
 commander.option("-q, --quiet", "Suppress compilation output");
 
 // General source map formatting.
-commander.option("-s, --source-maps [true|false|inline|both]", "", booleanify);
+commander.option("-s, --source-maps [true|false|inline|both]", "generate source maps", unstringify);
 commander.option(
   "--source-map-target [string]",
   "set `file` on returned source map"
@@ -105,19 +104,15 @@ commander.version(
 
 commander.usage("[options] <files ...>");
 
-function booleanify(val: any): boolean | any {
-  if (val === "true" || val == 1) {
-    return true;
+function unstringify(val: string): any {
+  try {
+    return JSON.parse(val);
+  } catch {
+    return val;
   }
-
-  if (val === "false" || val == 0 || !val) {
-    return false;
-  }
-
-  return val;
 }
 
-function collect(value: any, previousValue: any): Array<string> {
+function collect(value: string, previousValue?: string[]): string[] | undefined {
   // If the user passed the option with no value, like "babel file.js --presets", do nothing.
   if (typeof value !== "string") return previousValue;
 
@@ -151,43 +146,37 @@ export interface CliOptions {
 }
 
 export default function parserArgs(args: string[]) {
-  //
   commander.parse(args);
+  const opts = commander.opts();
 
+  const filenames = commander.args;
   const errors = [];
 
-  let filenames = commander.args.reduce(function (globbed: string[], input) {
-    let files = glob.sync(input);
-    if (!files.length) files = [input];
-    return globbed.concat(files);
-  }, []);
-  filenames = uniq(filenames);
-
-  if (commander.outDir && !filenames.length) {
+  if (opts.outDir && !filenames.length) {
     errors.push("--out-dir requires filenames");
   }
 
-  if (commander.outFile && commander.outDir) {
+  if (opts.outFile && opts.outDir) {
     errors.push("--out-file and --out-dir cannot be used together");
   }
 
-  if (commander.watch) {
-    if (!commander.outFile && !commander.outDir) {
+  if (opts.watch) {
+    if (!opts.outFile && !opts.outDir) {
       errors.push("--watch requires --out-file or --out-dir");
     }
 
     if (!filenames.length) {
       errors.push("--watch requires filenames");
     }
-  } else if (commander.logWatchCompilation) {
+  } else if (opts.logWatchCompilation) {
     errors.push("--log-watch-compilation requires --watch")
   }
 
   if (
-    !commander.outDir &&
+    !opts.outDir &&
     filenames.length === 0 &&
-    typeof commander.filename !== "string" &&
-    commander.swcrc !== false
+    typeof opts.filename !== "string" &&
+    opts.swcrc !== false
   ) {
     errors.push(
       "stdin compilation requires either -f/--filename [filename] or --no-swcrc"
@@ -196,50 +185,41 @@ export default function parserArgs(args: string[]) {
 
   if (errors.length) {
     console.error("swc:");
-    errors.forEach(function (e) {
-      console.error("  " + e);
-    });
+    for (const error of errors) {
+      console.error("  " + error);
+    }
     process.exit(2);
   }
 
-  const opts = commander.opts();
-
-  let swcOptions: Options = {
+  const swcOptions: Options = {
     jsc: {
       parser: undefined,
       transform: {}
     },
     // filename,
     sourceMaps: opts.sourceMaps,
+    sourceFileName: opts.sourceFileName,
+    sourceRoot: opts.sourceRoot,
     configFile: opts.configFile
   };
 
   if (opts.config) {
     for (const cfg of opts.config as string[]) {
       const i = cfg.indexOf("=");
-      let key, value: any;
+      let key: string;
+      let value: any;
       if (i === -1) {
         key = cfg;
         value = true;
       } else {
         key = cfg.substring(0, i);
-        value = cfg.substring(i + 1);
+        value = unstringify(cfg.substring(i + 1));
       }
-
-      let obj: any = swcOptions;
-      const ks = key.split(".");
-      for (const k of ks.slice(0, ks.length - 1)) {
-        if (!obj[k]) {
-          obj[k] = {};
-        }
-        obj = obj[k];
-      }
-
-      obj[ks[ks.length - 1]] = value;
+      set(swcOptions, key, value);
     }
   }
 
-  let cliOptions: CliOptions = {
+  const cliOptions: CliOptions = {
     outDir: opts.outDir,
     outFile: opts.outFile,
     filename: opts.filename,

@@ -16,8 +16,7 @@ export function readdir(
   filter?: ReaddirFilter
 ) {
   return readdirRecursive(
-    // @ts-ignore
-    dirname,
+    dirname.toString(),
     // @ts-ignore
     (filename: string, _index, currentDirectory: string) => {
       const stat = fs.statSync(path.join(currentDirectory, filename));
@@ -35,7 +34,7 @@ export function readdir(
 export function readdirForCompilable(
   dirname: string,
   includeDotfiles: boolean,
-  altExts?: Array<string>
+  altExts?: string[]
 ): string[] {
   return readdir(dirname, includeDotfiles, function(filename) {
     return isCompilableExtension(filename, altExts);
@@ -47,11 +46,10 @@ export function readdirForCompilable(
  */
 export function isCompilableExtension(
   filename: string,
-  altExts?: Array<string>
+  altExts: readonly string[] = swc.DEFAULT_EXTENSIONS
 ): boolean {
-  const exts = altExts || [".js", ".jsx", ".es6", ".es", ".mjs", ".ts", ".tsx"];
   const ext = path.extname(filename);
-  return includes(exts, ext);
+  return includes(altExts, ext);
 }
 
 export function addSourceMappingUrl(code: string, loc: string) {

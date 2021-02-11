@@ -9,7 +9,6 @@ import sourceMap, { SourceMapGenerator } from "source-map";
 import { CliOptions } from "./options";
 import * as util from "./util";
 
-// @ts-ignore
 export default async function ({
   cliOptions,
   swcOptions
@@ -52,7 +51,7 @@ export default async function ({
               column: mapping.generatedColumn
             },
             source: mapping.source,
-            // @ts-ignore
+            // @ts-expect-error
             original:
               mapping.source == null
                 ? null
@@ -168,21 +167,21 @@ export default async function ({
 
     const results = await Promise.all(
       _filenames.map(async function (filename) {
-        let sourceFilename = filename;
+        let sourceFileName = filename;
         if (cliOptions.outFile) {
-          sourceFilename = path.relative(
+          sourceFileName = path.relative(
             path.dirname(cliOptions.outFile),
-            sourceFilename
+            sourceFileName
           );
         }
-        sourceFilename = slash(sourceFilename);
+        sourceFileName = slash(sourceFileName);
 
         try {
           return await util.compile(
             filename,
             defaults(
               {
-                sourceFileName: sourceFilename,
+                sourceFileName,
                 // Since we're compiling everything to be merged together,
                 // "inline" applies to the final output file, but to the individual
                 // files being concatenated.

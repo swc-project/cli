@@ -1,10 +1,6 @@
 import * as swc from "@swc/core";
 import fs from "fs";
-import { ceil } from "lodash";
 import defaults from "lodash/defaults";
-import { sync as mkdirpSync } from "mkdirp";
-// @ts-ignore
-import outputFileSync from "output-file-sync";
 import path from "path";
 import slash from "slash";
 
@@ -34,13 +30,14 @@ export default async function ({
     relative = util.adjustRelative(relative, cliOptions.keepFileExtension);
 
     const dest = getDest(relative, base);
+    const destDir = path.dirname(dest);
 
     try {
       const res = await util.compile(
         src,
         defaults(
           {
-            sourceFileName: slash(path.relative(dest + "/..", src))
+            sourceFileName: slash(path.relative(destDir, src))
           },
           swcOptions
         ),
@@ -48,6 +45,8 @@ export default async function ({
       );
 
       if (!res) return false;
+
+      fs.mkdirSync(destDir, { recursive: true })
 
       let code = res.code;
       // we've requested explicit sourcemaps to be written to disk
@@ -59,10 +58,10 @@ export default async function ({
         const mapLoc = dest + ".map";
         code = util.addSourceMappingUrl(code, mapLoc);
         map.file = path.basename(relative);
-        outputFileSync(mapLoc, JSON.stringify(map));
+        fs.writeFileSync(mapLoc, JSON.stringify(map));
       }
 
-      outputFileSync(dest, code);
+      fs.writeFileSync(dest, code);
       util.chmod(src, dest);
 
       if (cliOptions.verbose) {
@@ -99,7 +98,8 @@ export default async function ({
     if (written === false && cliOptions.copyFiles) {
       const filename = path.relative(base, src);
       const dest = getDest(filename, base);
-      outputFileSync(dest, fs.readFileSync(src));
+      fs.mkdirSync(path.dirname(dest), { recursive: true });
+      fs.copyFileSync(src, dest);
       util.chmod(src, dest);
     }
     return written;
@@ -149,9 +149,9 @@ export default async function ({
   }
 
   if (cliOptions.deleteDirOnStart) {
-    util.deleteDir(cliOptions.outDir);
+    fs.rmdirSync(cliOptions.outDir, { recursive: true })
   }
-  mkdirpSync(cliOptions.outDir);
+  fs.mkdirSync(cliOptions.outDir, { recursive: true });
 
   let compiledFiles = 0;
   let failedFiles = 0;

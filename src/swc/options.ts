@@ -1,4 +1,4 @@
-import { Options, version as swcCoreVersion } from "@swc/core";
+import { DEFAULT_EXTENSIONS, Options, version as swcCoreVersion } from "@swc/core";
 import commander from "commander";
 import { set } from "lodash";
 
@@ -134,10 +134,7 @@ export interface CliOptions {
   readonly filename: string;
   readonly filenames: string[];
   readonly extensions: string[];
-  readonly keepFileExtension: boolean;
-  readonly verbose: boolean;
   readonly watch: boolean;
-  readonly relative: boolean;
   readonly copyFiles: boolean;
   readonly includeDotfiles: boolean;
   readonly deleteDirOnStart: boolean;
@@ -226,11 +223,8 @@ export default function parserArgs(args: string[]) {
     filenames,
     sync: !!opts.sync,
     sourceMapTarget: opts.sourceMapTarget,
-    extensions: opts.extensions,
-    keepFileExtension: opts.keepFileExtension,
-    verbose: !!opts.verbose,
+    extensions: opts.extensions || DEFAULT_EXTENSIONS,
     watch: !!opts.watch,
-    relative: !!opts.relative,
     copyFiles: !!opts.copyFiles,
     includeDotfiles: !!opts.includeDotfiles,
     deleteDirOnStart: !!opts.deleteDirOnStart,

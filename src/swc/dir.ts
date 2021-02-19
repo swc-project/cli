@@ -12,140 +12,54 @@ export default async function ({
   swcOptions
 }: {
   cliOptions: CliOptions;
-  swcOptions: swc.Config;
+  swcOptions: swc.Options;
 }) {
-  const filenames = cliOptions.filenames;
-
   /**
-   * Returns `undefined` if a file is ignored.
+   * Removes the leading directory, including all parent relative paths
    */
-  async function write(src: string, base: string): Promise<boolean | undefined> {
-    let relative = path.relative(base, src);
-
-    if (!util.isCompilableExtension(relative, cliOptions.extensions)) {
-      return undefined;
+  function stripComponents(filename: string) {
+    const components = filename.split('/').slice(1);
+    if (!components.length) {
+      return filename;
     }
+    while (components[0] === '..') {
+      components.shift();
+    }
+    return components.join('/');
+  }
 
-    // remove extension and then append back on .js
-    relative = util.adjustRelative(relative, cliOptions.keepFileExtension);
+  function getDest(filename: string, ext?: string) {
+    const relative = slash(path.relative(process.cwd(), filename));
+    let base = stripComponents(relative);
+    if (ext) {
+      base = base.replace(/\.\w*$/, ext);
+    }
+    return path.join(cliOptions.outDir, base);
+  }
 
-    const dest = getDest(relative, base);
-    const destDir = path.dirname(dest);
+  async function handle(filename: string) {
+    if (util.isCompilableExtension(filename, cliOptions.extensions)) {
+      const dest = getDest(filename, ".js");
+      const sourceFileName = slash(path.relative(path.dirname(dest), filename));
 
-    try {
-      const res = await util.compile(
-        src,
-        defaults(
-          {
-            sourceFileName: slash(path.relative(destDir, src))
-          },
-          swcOptions
-        ),
+      const result = await util.compile(
+        filename,
+        defaults({ sourceFileName }, swcOptions),
         cliOptions.sync
       );
-
-      if (!res) return false;
-
-      fs.mkdirSync(destDir, { recursive: true })
-
-      let code = res.code;
-      // we've requested explicit sourcemaps to be written to disk
-      if (res.map) {
-        let map = JSON.parse(res.map);
-
-        // TODO: Handle inline source map
-
-        const mapLoc = dest + ".map";
-        code = util.addSourceMappingUrl(code, mapLoc);
-        map.file = path.basename(relative);
-        fs.writeFileSync(mapLoc, JSON.stringify(map));
+  
+      if (result) {
+        util.outputFile(result, dest, swcOptions.sourceMaps);
+        util.chmod(filename, dest);
+        return true;
       }
-
-      fs.writeFileSync(dest, code);
-      util.chmod(src, dest);
-
-      if (cliOptions.verbose) {
-        console.log(src + " -> " + dest);
-      }
-
-      return true;
-    } catch (err) {
-      if (cliOptions.watch) {
-        console.error(err);
-        return false;
-      }
-
-      throw err;
-    }
-  }
-
-  function getDest(filename: string, base: string) {
-    if (cliOptions.relative) {
-      return path.join(base, cliOptions.outDir, filename);
-    }
-    return path.join(cliOptions.outDir, filename);
-  }
-
-  /**
-   * Returns `undefined` if a file is ignored.
-   */
-  async function handleFile(src: string, base: string): Promise<boolean | undefined> {
-    const written = await write(src, base).catch(e => {
-      if (e?.toString().includes("ignored by .swcrc")) { return undefined }
-      throw e;
-    });
-
-    if (written === false && cliOptions.copyFiles) {
-      const filename = path.relative(base, src);
-      const dest = getDest(filename, base);
+    } else if (cliOptions.copyFiles) {
+      const dest = getDest(filename);
       fs.mkdirSync(path.dirname(dest), { recursive: true });
-      fs.copyFileSync(src, dest);
-      util.chmod(src, dest);
+      fs.copyFileSync(filename, dest);
+      return 'copied';
     }
-    return written;
-  }
-
-  type HandleResult = { succeeded: number; failed: number }
-
-  async function handle(filenameOrDir: string): Promise<HandleResult> {
-    if (!fs.existsSync(filenameOrDir)) return { succeeded: 0, failed: 0 };
-    const stat = fs.statSync(filenameOrDir);
-
-    if (stat.isDirectory()) {
-      const dirname = filenameOrDir;
-
-      let succeeded = 0;
-      let failed = 0;
-
-      const files = util.readdir(dirname, cliOptions.includeDotfiles);
-
-      await Promise.all(
-        files.map(async (filename: string) => {
-          const src = path.join(dirname, filename);
-          try {
-            const written = await handleFile(src, dirname);
-            if (written) {
-              succeeded += 1;
-            } else if (written === false) {
-              failed += 1;
-            }
-          } catch (e) {
-            console.error(e);
-            failed += 1;
-          }
-        })
-      );
-
-      return { succeeded, failed };
-    } else {
-      const filename = filenameOrDir;
-      const written = await handleFile(filename, path.dirname(filename));
-
-      return {
-        succeeded: written ? 1 : 0,
-        failed: written === false ? 1 : 0
-      };
-    }
+    return false;
   }
 
   if (cliOptions.deleteDirOnStart) {
@@ -153,65 +67,65 @@ export default async function ({
   }
   fs.mkdirSync(cliOptions.outDir, { recursive: true });
 
-  let compiledFiles = 0;
-  let failedFiles = 0;
-
-  for (const filename of cliOptions.filenames) {
-    const { succeeded, failed } = await handle(filename);
-    compiledFiles += succeeded
-    failedFiles += failed
-  }
-
-  if (!cliOptions.quiet) {
-    if (compiledFiles > 0) {
-      console.log(
-        `Successfully compiled ${compiledFiles} ${compiledFiles !== 1 ? "files" : "file"
-        } with swc.`
-      );
-    }
-
-    if (failedFiles > 0) {
-      const error = `Failed to compile ${failedFiles} ${failedFiles !== 1 ? "files" : "file"
-        } with swc.`
-      if (!cliOptions.watch) throw new Error(error)
-      else console.error(error)
+  const results = new Map<string, Error | boolean | 'copied'>();
+  for (const filename of util.globSources(cliOptions.filenames, cliOptions.includeDotfiles)) {
+    try {
+      const result = await handle(filename);
+      if (result !== undefined) {
+        results.set(filename, result);
+      }
+    } catch (err) {
+      console.error(err.message);
+      results.set(filename, err);
     }
   }
 
   if (cliOptions.watch) {
-    const chokidar = util.requireChokidar();
-
-    filenames.forEach(function (filenameOrDir) {
-      const watcher = chokidar.watch(filenameOrDir, {
-        persistent: true,
-        ignoreInitial: true,
-        awaitWriteFinish: {
-          stabilityThreshold: 50,
-          pollInterval: 10
+    const watcher = util.watchSources(cliOptions.filenames, cliOptions.includeDotfiles);
+    watcher.on('ready', () => {
+      try {
+        util.assertCompilationResult(results, cliOptions.quiet);
+        if (!cliOptions.quiet) {
+          console.info('Watching for file changes.')
         }
-      });
-
-      ["add", "change"].forEach(function (type) {
-        watcher.on(type, function (filename: string) {
-          const start = process.hrtime()
-
-          handleFile(
-            filename,
-            filename === filenameOrDir
-              ? path.dirname(filenameOrDir)
-              : filenameOrDir
-          )
-            .then(ok => {
-              if (cliOptions.logWatchCompilation && ok) {
-                const [seconds, nanoseconds] = process.hrtime(start);
-                const ms = (seconds * 1000000000 + nanoseconds) / 1000000;
-                const name = path.basename(filename);
-                console.log(`Compiled ${name} in ${ms.toFixed(2)}ms`);
-              }
-            })
-            .catch(console.error);
-        });
-      });
+      } catch (err) {
+        console.error(err.message);
+      }
     });
+    watcher.on('unlink', (filename) => {
+      try {
+        if (util.isCompilableExtension(filename, cliOptions.extensions)) {
+          fs.unlinkSync(getDest(filename, ".js"));
+        } else if (cliOptions.copyFiles) {
+          fs.unlinkSync(getDest(filename));
+        }
+      } catch (err) {
+        if (err.code !== 'ENOENT') {
+          console.error(err.stack);
+        }
+      }
+    });
+    for (const type of ['add', 'change']) {
+      watcher.on(type, (filename) => {
+        const start = process.hrtime()
+
+        handle(filename)
+          .then((result) => {
+            results.set(filename, result);
+            if (result && cliOptions.logWatchCompilation) {
+              const [seconds, nanoseconds] = process.hrtime(start);
+              const ms = seconds * 1000 + (nanoseconds * 1e-6);
+              const name = path.basename(filename);
+              console.log(`${result === "copied" ? "Copied" : "Compiled"} ${name} in ${ms.toFixed(2)}ms`);
+            }
+          })
+          .catch((err) => {
+            console.error(err.message);
+            results.set(filename, err);
+          });
+      });
+    }
+  } else {
+    util.assertCompilationResult(results, cliOptions.quiet);
   }
 }

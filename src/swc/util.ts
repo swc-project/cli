@@ -1,4 +1,5 @@
 import * as swc from "@swc/core";
+import convertSourceMap from 'convert-source-map';
 import fs from "fs";
 import glob from "glob";
 import uniq from "lodash/uniq";
@@ -89,9 +90,23 @@ export async function compile(
   };
 
   try {
-    return sync
+    const result = sync
       ? swc.transformFileSync(filename, opts)
       : await swc.transformFile(filename, opts);
+
+    if (result.map) {
+      const map = convertSourceMap.fromJSON(result.map);
+      // TODO: fix this in core
+      // https://github.com/swc-project/swc/issues/1388
+      if (opts.sourceFileName) {
+        map.getProperty('sources')[0] = opts.sourceFileName;
+      }
+      if (opts.sourceRoot) {
+        map.setProperty('sourceRoot', opts.sourceRoot);
+      }
+      result.map = map.toJSON();
+    }
+    return result;
   } catch (err) {
     if (!err.message.includes("ignored by .swcrc")) {
       throw err;

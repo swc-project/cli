@@ -1,15 +1,13 @@
 import swc from "@swc/core";
-import convertSourceMap from "convert-source-map";
-import fs from "fs";
+import convertSourceMap from 'convert-source-map';
 import defaults from "lodash/defaults";
 import path from "path";
 import slash from "slash";
-import sourceMap, { SourceMapGenerator } from "source-map";
+import { SourceMapConsumer, SourceMapGenerator } from "source-map";
 
 import { CliOptions } from "./options";
 import * as util from "./util";
 
-// @ts-ignore
 export default async function ({
   cliOptions,
   swcOptions
@@ -17,232 +15,196 @@ export default async function ({
   cliOptions: CliOptions;
   swcOptions: swc.Options;
 }) {
-  async function buildResult(
-    fileResults: (swc.Output | null)[]
-  ): Promise<{
-    code: string;
-    map: SourceMapGenerator;
-  }> {
-    const map = new sourceMap.SourceMapGenerator({
-      file:
-        cliOptions.sourceMapTarget ||
-        path.basename(cliOptions.outFile || "") ||
-        "stdout",
+  async function concatResults(
+    file: string,
+    ...results: swc.Output[]
+  ): Promise<swc.Output> {
+    const map = new SourceMapGenerator({
+      file,
       sourceRoot: swcOptions.sourceRoot
     });
 
     let code = "";
     let offset = 0;
 
-    for (const result of fileResults) {
-      if (!result) continue;
-
+    for (const result of results) {
       code += result.code + "\n";
 
       if (result.map) {
-        const consumer = await new sourceMap.SourceMapConsumer(result.map);
-        const sources = new Set();
+        const consumer = await new SourceMapConsumer(result.map);
+        const sources = new Set<string>();
 
-        consumer.eachMapping(function (mapping: any) {
-          if (mapping.source != null) sources.add(mapping.source);
-
+        consumer.eachMapping(mapping => {
+          sources.add(mapping.source);
           map.addMapping({
             generated: {
               line: mapping.generatedLine + offset,
               column: mapping.generatedColumn
             },
-            source: mapping.source,
-            // @ts-ignore
-            original:
-              mapping.source == null
-                ? null
-                : {
-                  line: mapping.originalLine,
-                  column: mapping.originalColumn
-                }
+            original: {
+              line: mapping.originalLine,
+              column: mapping.originalColumn
+            },
+            source: mapping.source
           });
         });
 
         sources.forEach(source => {
-          const content = consumer.sourceContentFor(source as any, true);
+          const content = consumer.sourceContentFor(source, true);
           if (content !== null) {
-            map.setSourceContent(source as any, content);
+            map.setSourceContent(source, content);
           }
         });
-
-        offset = code.split("\n").length - 1;
       }
-    }
-
-    // add the inline sourcemap comment if we've either explicitly asked for inline source
-    // maps, or we've requested them without any output file
-    if (
-      swcOptions.sourceMaps === "inline" ||
-      (!cliOptions.outFile && swcOptions.sourceMaps)
-    ) {
-      code += "\n" + convertSourceMap.fromObject(map).toComment();
+      offset = code.split("\n").length - 1;
     }
 
     return {
-      map: map,
-      code: code
+      code,
+      map: JSON.stringify(map)
     };
   }
 
-  async function output(fileResults: (swc.Output | null)[]): Promise<void> {
-    const result = await buildResult(fileResults);
+  async function output(results: Iterable<swc.Output>) {
+    const file = cliOptions.sourceMapTarget || path.basename(cliOptions.outFile || "stdout");
+
+    const result = await concatResults(file, ...results);
 
     if (cliOptions.outFile) {
-      // we've requested for a sourcemap to be written to disk
-      if (swcOptions.sourceMaps && swcOptions.sourceMaps !== "inline") {
-        const mapLoc = cliOptions.outFile + ".map";
-        result.code = util.addSourceMappingUrl(result.code, mapLoc);
-        fs.writeFileSync(mapLoc, JSON.stringify(result.map));
-      }
-
-      fs.writeFileSync(cliOptions.outFile, result.code);
+      util.outputFile(result, cliOptions.outFile, swcOptions.sourceMaps);
     } else {
       process.stdout.write(result.code + "\n");
+      if (result.map && swcOptions.sourceMaps) {
+        process.stdout.write(convertSourceMap.fromJSON(result.map).toComment());
+      }
     }
   }
 
-  function readStdin(): Promise<string> {
-    return new Promise((resolve, reject) => {
-      let code = "";
-
-      process.stdin.setEncoding("utf8");
-
-      process.stdin.on("readable", function () {
-        const chunk = process.stdin.read();
-        if (chunk !== null) code += chunk;
-      });
-
-      process.stdin.on("end", function () {
-        resolve(code);
-      });
-      process.stdin.on("error", reject);
-    });
-  }
-
-  async function stdin() {
-    const code = await readStdin();
-
-    const res = await util.transform(
-      cliOptions.filename,
-      code,
+  async function handle(filename: string) {
+    const sourceFileName = slash(
+      cliOptions.outFile
+        ? path.relative(path.dirname(cliOptions.outFile), filename)
+        : filename
+    );
+    return await util.compile(
+      filename,
       defaults(
         {
-          sourceFileName: "stdin"
+          sourceFileName,
+          // Since we're compiling everything to be merged together,
+          // "inline" applies to the final output file, but not to the individual
+          // files being concatenated.
+          sourceMaps: Boolean(swcOptions.sourceMaps)
         },
         swcOptions
       ),
+      cliOptions.sync
+    );
+  }
+
+  function getProgram(previousResults: Map<string, swc.Output | Error> = new Map()) {
+    const results: typeof previousResults = new Map();
+    for (const filename of util.globSources(cliOptions.filenames, cliOptions.includeDotfiles)) {
+      if (util.isCompilableExtension(filename, cliOptions.extensions)) {
+        results.set(filename, previousResults.get(filename)!);
+      }
+    }
+    return results;
+  }
+
+  async function files() {
+    let results = getProgram();
+    for (const filename of results.keys()) {
+      try {
+        const result = await handle(filename);
+        if (result) {
+          results.set(filename, result);
+        } else {
+          results.delete(filename);
+        }
+      } catch (err) {
+        console.error(err.message);
+        results.set(filename, err);
+      }
+    }
+
+    if (cliOptions.watch) {
+      const watcher = util.watchSources(cliOptions.filenames, cliOptions.includeDotfiles);
+      watcher.on('ready', () => {
+        Promise.resolve()
+          .then(async () => {
+            util.assertCompilationResult(results, cliOptions.quiet);
+            await output(results.values());
+            if (!cliOptions.quiet) {
+              console.info('Watching for file changes.')
+            }
+          })
+          .catch((err) => {
+            console.error(err.message);
+          });
+      });
+      watcher.on("add", (filename) => {
+        if (util.isCompilableExtension(filename, cliOptions.extensions)) {
+          // ensure consistent insertion order when files are added
+          results = getProgram(results);
+        }
+      });
+      watcher.on("unlink", (filename) => {
+        results.delete(filename);
+      });
+      for (const type of ["add", "change"]) {
+        watcher.on(type, (filename) => {
+          if (!util.isCompilableExtension(filename, cliOptions.extensions)) {
+            return;
+          }
+    
+          const start = process.hrtime();
+  
+          handle(filename)
+            .then(async (result) => {
+              if (!result) {
+                results.delete(filename);
+                return;
+              }
+              results.set(filename, result);
+              util.assertCompilationResult(results, true);
+              await output(results.values());
+              if (cliOptions.logWatchCompilation) {
+                const [seconds, nanoseconds] = process.hrtime(start);
+                const ms = seconds * 1000 + (nanoseconds * 1e-6);
+                const name = path.basename(cliOptions.outFile);
+                console.log(`Compiled ${name} in ${ms.toFixed(2)}ms`);
+              }
+            })
+            .catch((err) => {
+              console.error(err.message);
+            });
+        });
+      }
+    } else {
+      util.assertCompilationResult(results, cliOptions.quiet);
+      await output(results.values());
+    }
+  }
+
+  async function stdin() {
+    let code = "";
+    process.stdin.setEncoding("utf8");
+    for await (const chunk of process.stdin) {
+      code += chunk;
+    }
+    const res = await util.transform(
+      cliOptions.filename,
+      code,
+      defaults({ sourceFileName: "stdin" }, swcOptions),
       cliOptions.sync
     );
 
     output([res]);
   }
 
-  async function walk(filenames: string[]) {
-    const _filenames: string[] = [];
-
-    filenames.forEach(function (filename) {
-      if (!fs.existsSync(filename)) return;
-
-      const stat = fs.statSync(filename);
-      if (stat.isDirectory()) {
-        const dirname = filename;
-
-        util
-          .readdirForCompilable(
-            filename,
-            cliOptions.includeDotfiles,
-            cliOptions.extensions
-          )
-          .forEach(function (filename: string) {
-            _filenames.push(path.join(dirname, filename));
-          });
-      } else {
-        _filenames.push(filename);
-      }
-    });
-
-    const results = await Promise.all(
-      _filenames.map(async function (filename) {
-        let sourceFilename = filename;
-        if (cliOptions.outFile) {
-          sourceFilename = path.relative(
-            path.dirname(cliOptions.outFile),
-            sourceFilename
-          );
-        }
-        sourceFilename = slash(sourceFilename);
-
-        try {
-          return await util.compile(
-            filename,
-            defaults(
-              {
-                sourceFileName: sourceFilename,
-                // Since we're compiling everything to be merged together,
-                // "inline" applies to the final output file, but to the individual
-                // files being concatenated.
-                sourceMaps:
-                  swcOptions.sourceMaps === "inline"
-                    ? true
-                    : swcOptions.sourceMaps
-              },
-              swcOptions
-            ),
-            cliOptions.sync
-          );
-        } catch (err) {
-          if (!cliOptions.watch) {
-            throw err;
-          }
-
-          console.error(err);
-          return null;
-        }
-      })
-    );
-
-    output(results);
-  }
-
-  async function files(filenames: string[]) {
-    await walk(filenames);
-
-    if (cliOptions.watch) {
-      const chokidar = util.requireChokidar();
-      chokidar
-        .watch(filenames, {
-          persistent: true,
-          ignoreInitial: true,
-          awaitWriteFinish: {
-            stabilityThreshold: 50,
-            pollInterval: 10
-          }
-        })
-        .on("all", function (type: string, filename: string) {
-          if (!util.isCompilableExtension(filename, cliOptions.extensions)) {
-            return;
-          }
-
-          if (type === "add" || type === "change") {
-            if (cliOptions.verbose) {
-              console.log(type + " " + filename);
-            }
-
-            walk(filenames).catch(err => {
-              console.error(err);
-            });
-          }
-        });
-    }
-  }
-
   if (cliOptions.filenames.length) {
-    await files(cliOptions.filenames);
+    await files();
   } else {
     await stdin();
   }

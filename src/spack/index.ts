@@ -1,6 +1,5 @@
 import { bundle } from '@swc/core';
 import { mkdir, writeFile } from 'fs';
-import { findLastIndex } from 'lodash';
 import { basename, dirname, extname, join, relative } from 'path'
 import { promisify } from 'util';
 

@@ -3,9 +3,6 @@ import { BundleOptions, compileBundleOptions } from "@swc/core/spack";
 import commander from "commander";
 import * as path from 'path';
 
-import { prepare } from 'rechoir'
-import { extensions } from './extensions';
-
 const pkg = require("../../package.json");
 
 export interface SpackCliOptions {
@@ -20,7 +17,6 @@ commander.option("--mode <development | production | none>", "Mode to use");
 commander.option(
     '--context [path]', ` The base directory (absolute path!) for resolving the 'entry'`
 + ` option. If 'output.pathinfo' is set, the included pathinfo is shortened to this directory`,
-    undefined,
     'The current directory'
 );
 

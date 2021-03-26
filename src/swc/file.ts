@@ -74,7 +74,7 @@ export default async function ({
       util.outputFile(result, cliOptions.outFile, swcOptions.sourceMaps);
     } else {
       process.stdout.write(result.code + "\n");
-      if (result.map && swcOptions.sourceMaps) {
+      if (result.map) {
         process.stdout.write(convertSourceMap.fromJSON(result.map).toComment());
       }
     }
@@ -157,9 +157,9 @@ export default async function ({
           if (!util.isCompilableExtension(filename, cliOptions.extensions)) {
             return;
           }
-    
+
           const start = process.hrtime();
-  
+
           handle(filename)
             .then(async (result) => {
               if (!result) {

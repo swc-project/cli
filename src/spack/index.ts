@@ -38,18 +38,20 @@ const makeDir = promisify(mkdir);
         const emitStart = process.hrtime();
         if (spackOptions.output?.path) {
             await Object.keys(output).map(async (name) => {
+                let fullPath = '';
                 if (isUserDefinedEntry(name)) {
-                    const fullPath = join(spackOptions.output.path, spackOptions.output.name.replace('[name]', name));
-                    await makeDir(dirname(fullPath), { recursive: true });
-                    await write(fullPath, output[name].code, 'utf-8');
+                    fullPath = join(spackOptions.output.path, spackOptions.output.name.replace('[name]', name));
                 } else {
                     const ext = extname(name);
                     const base = basename(name, ext);
                     const filename = relative(process.cwd(), name);
-                    const fullPath = join(spackOptions.output.path, dirname(filename), `${base}.js`)
+                    fullPath = join(spackOptions.output.path, dirname(filename), `${base}.js`)
+                }
 
-                    await makeDir(dirname(fullPath), { recursive: true });
-                    await write(fullPath, output[name].code, 'utf-8');
+                await makeDir(dirname(fullPath), { recursive: true });
+                await write(fullPath, output[name].code, 'utf-8');
+                if (output[name].map) {
+                    await write(`${fullPath}.map`, output[name].map, 'utf-8')
                 }
             });
         } else {

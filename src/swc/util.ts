@@ -125,8 +125,9 @@ export function outputFile(
   let code = output.code;
   if (output.map && sourceMaps && sourceMaps !== "inline") {
     // we've requested for a sourcemap to be written to disk
+    const fileDirName = path.dirname(filename);
     const mapLoc = filename + ".map";
-    code += "\n//# sourceMappingURL=" + slash(path.relative(filename, mapLoc));
+    code += "\n//# sourceMappingURL=" + slash(path.relative(fileDirName, mapLoc));
     fs.writeFileSync(mapLoc, output.map);
   }
 

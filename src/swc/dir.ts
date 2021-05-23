@@ -47,7 +47,7 @@ export default async function ({
         defaults({ sourceFileName }, swcOptions),
         cliOptions.sync
       );
-  
+
       if (result) {
         util.outputFile(result, dest, swcOptions.sourceMaps);
         util.chmod(filename, dest);
@@ -68,7 +68,7 @@ export default async function ({
   fs.mkdirSync(cliOptions.outDir, { recursive: true });
 
   const results = new Map<string, Error | boolean | 'copied'>();
-  for (const filename of util.globSources(cliOptions.filenames, cliOptions.includeDotfiles)) {
+  for (const filename of await util.globSources(cliOptions.filenames, cliOptions.includeDotfiles)) {
     try {
       const result = await handle(filename);
       if (result !== undefined) {

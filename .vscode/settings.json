@@ -1,4 +1,8 @@
 {
   "editor.formatOnSave": true,
-  "typescriptHero.imports.organizeOnSave": false
+  "typescriptHero.imports.organizeOnSave": false,
+  "cSpell.words": [
+    "Dotfiles",
+    "nodir"
+  ]
 }

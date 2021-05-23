@@ -1,6 +1,6 @@
 import { DEFAULT_EXTENSIONS, Options, version as swcCoreVersion } from "@swc/core";
 import commander from "commander";
-import { set } from "lodash";
+import set from "lodash/set";
 
 const pkg = require("../../package.json");
 

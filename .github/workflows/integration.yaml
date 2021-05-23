@@ -1,0 +1,96 @@
+name: Test
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [12.x, 14.x, 16.x]
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Install
+        run: yarn install
+
+      - name: Build
+        run: yarn build
+
+      - name: Test
+        run: yarn test
+
+      - name: Link
+        run: |
+          yarn link
+          npm link
+
+      - name: (swc) three.js
+        run: |
+          mkdir -p integration-tests/three.js
+          git clone --depth 1 https://github.com/mrdoob/three.js.git integration-tests/three.js
+
+          cd integration-tests/three.js
+          npm install
+          npm install @swc/core @swc/cli
+          npm link @swc/cli
+
+          tee -a .swcrc <<EOF
+            {
+              "jsc": {
+                  "target": "es2019",
+                  "parser": {
+                    "syntax": "typescript",
+                    "dynamicImport": true
+                  }
+              },
+              "module": {
+                  "type": "commonjs"
+              }
+            }
+          EOF
+
+          echo "Run swc sync"
+          swc --sync src -d ./build-src/
+          swc --sync editor -d ./build-editor/
+
+          echo "Run swc async"
+          swc src -d ./build-src/
+          swc editor -d ./build-editor/
+
+      - name: (swc) rxjs
+        run: |
+          mkdir -p integration-tests/rxjs
+          git clone --depth 1 https://github.com/ReactiveX/rxjs.git integration-tests/rxjs
+
+          cd integration-tests/rxjs
+          npm install
+          npm install @swc/core @swc/cli
+          npm link @swc/cli
+
+          tee -a .swcrc <<EOF
+            {
+              "jsc": {
+                  "target": "es2019",
+                  "parser": {
+                    "syntax": "typescript",
+                    "dynamicImport": true
+                  }
+              },
+              "module": {
+                  "type": "commonjs"
+              }
+            }
+          EOF
+
+          echo "Run swc sync"
+          swc --sync src -d ./build-src/
+
+          echo "Run swc async"
+          swc src -d ./build-src/

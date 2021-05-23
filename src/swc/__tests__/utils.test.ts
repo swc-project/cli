@@ -3,7 +3,7 @@ import fs from 'fs'
 import glob from "fast-glob";
 
 jest.mock('fs');
-jest.mock('glob');
+jest.mock('fast-glob');
 
 describe('globSources', () => {
   beforeEach(() => {

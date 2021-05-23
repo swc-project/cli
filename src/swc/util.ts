@@ -2,7 +2,7 @@ import * as swc from "@swc/core";
 import convertSourceMap from 'convert-source-map';
 import { stat, chmodSync, statSync, mkdirSync, writeFileSync } from "fs";
 import type { PathLike } from 'fs';
-import glob from "glob";
+import glob from "fast-glob";
 import path from "path";
 import slash from "slash";
 
@@ -20,7 +20,6 @@ export async function globSources(
   const globConfig = {
     dot: includeDotfiles,
     nodir: true,
-    stat: false,
   };
 
   const files = await Promise.all(
@@ -36,18 +35,15 @@ export async function globSources(
             if (!stat.isDirectory()) {
               resolve([source])
             } else {
-              glob(path.join(source, "**"), globConfig, (err, matches) => {
-                if (err) {
-                  resolve([]);
-                  return;
-                }
-                resolve(matches);
-              });
+              glob(path.join(source, "**"), globConfig)
+                .then((matches) => resolve(matches))
+                .catch(() => resolve([]))
             }
           });
         });
       })
-  )
+  );
+
   return new Set<string>(files.flat());
 }
 

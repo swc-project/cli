@@ -1,6 +1,6 @@
 import { globSources } from "../util";
 import fs from 'fs'
-import glob from "glob";
+import glob from "fast-glob";
 
 jest.mock('fs');
 jest.mock('glob');
@@ -44,9 +44,7 @@ describe('globSources', () => {
     (fs as any).setMockStats({ "directory": { isDirectory: () => true } });
     (fs as any).setMockStats({ "file": { isDirectory: () => false } });
 
-    (glob as unknown as jest.Mock).mockImplementation((pattern: string, config: object, cb: Function) => {
-      cb(undefined, ["fileDir1", "fileDir2"])
-    });
+    (glob as unknown as jest.Mock).mockResolvedValue(["fileDir1", "fileDir2"]);
     const files = await globSources(["file", "directory"], true);
 
     expect([...files]).toEqual([
@@ -60,9 +58,7 @@ describe('globSources', () => {
     (fs as any).setMockStats({ "directory": { isDirectory: () => true } });
     (fs as any).setMockStats({ "file": { isDirectory: () => false } });
 
-    (glob as unknown as jest.Mock).mockImplementation((pattern: string, config: object, cb: Function) => {
-      cb(new Error("Failed"))
-    });
+    (glob as unknown as jest.Mock).mockRejectedValue(new Error("Failed"));
     const files = await globSources(["file", "directory"], true);
 
     expect([...files]).toEqual([

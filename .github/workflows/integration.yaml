@@ -28,6 +28,7 @@ jobs:
 
       - name: Link
         run: |
+          yarn install --prod
           yarn link
           npm link
 
@@ -57,12 +58,14 @@ jobs:
           EOF
 
           echo "Run swc sync"
-          swc --sync src -d ./build-src/
-          swc --sync editor -d ./build-editor/
+          yarn swc --sync src -d ./build/
+          yarn swc --sync editor -d ./build-editor/
+
+          rm -rf build 
 
           echo "Run swc async"
-          swc src -d ./build-src/
-          swc editor -d ./build-editor/
+          yarn swc src -d ./build/
+          yarn swc editor -d ./build-editor/
 
       - name: (swc) rxjs
         run: |
@@ -90,9 +93,11 @@ jobs:
           EOF
 
           echo "Run swc sync"
-          yarn swc --sync src -d ./build-src/
+          yarn swc --sync src -d ./build/
           yarn swc --sync spec -d ./build-spec/
 
+          rm -rf build 
+
           echo "Run swc async"
-          yarn swc src -d ./build-src/
+          yarn swc src -d ./build/
           yarn swc spec -d ./build-spec/

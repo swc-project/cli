@@ -28,11 +28,9 @@ jobs:
 
       - name: Link
         run: |
-          yarn install --prod
           yarn link
-          npm link
 
-      - name: (swc) three.js
+      - name: (swc + spack) three.js
         run: |
           mkdir -p integration-tests/three.js
           git clone --depth 1 https://github.com/mrdoob/three.js.git integration-tests/three.js
@@ -40,21 +38,21 @@ jobs:
           cd integration-tests/three.js
           npm install @swc/core @swc/cli --save-dev
           npm install
-          npm link @swc/cli
+          yarn link @swc/cli
 
-          tee -a .swcrc <<EOF
-            {
-              "jsc": {
-                  "target": "es2019",
-                  "parser": {
-                    "syntax": "javascript",
-                    "dynamicImport": true
-                  }
-              },
-              "module": {
-                  "type": "commonjs"
-              }
+          tee .swcrc <<EOF
+          {
+            "jsc": {
+                "target": "es2019",
+                "parser": {
+                  "syntax": "ecmascript",
+                  "dynamicImport": true
+                }
+            },
+            "module": {
+                "type": "commonjs"
             }
+          }
           EOF
 
           echo "Run swc sync"
@@ -67,7 +65,21 @@ jobs:
           yarn swc src -d ./build/
           yarn swc editor -d ./build-editor/
 
-      - name: (swc) rxjs
+
+          tee spack.config.js <<EOF
+          module.exports = {
+            entry: {
+              web: __dirname + "/src/Three.js",
+            },
+            output: {
+              path: __dirname + "/out",
+            },
+          };
+          EOF
+
+          echo "Run spack"
+          yarn spack
+      - name: (swc + spack) rxjs
         run: |
           mkdir -p integration-tests/rxjs
           git clone --depth 1 https://github.com/ReactiveX/rxjs.git integration-tests/rxjs
@@ -75,21 +87,21 @@ jobs:
           cd integration-tests/rxjs
           npm install @swc/core @swc/cli --save-dev
           npm install
-          npm link @swc/cli
+          yarn link @swc/cli
 
-          tee -a .swcrc <<EOF
-            {
-              "jsc": {
-                  "target": "es2019",
-                  "parser": {
-                    "syntax": "typescript",
-                    "dynamicImport": true
-                  }
-              },
-              "module": {
-                  "type": "commonjs"
-              }
+          tee .swcrc <<EOF
+          {
+            "jsc": {
+                "target": "es2019",
+                "parser": {
+                  "syntax": "typescript",
+                  "dynamicImport": true
+                }
+            },
+            "module": {
+                "type": "commonjs"
             }
+          }
           EOF
 
           echo "Run swc sync"
@@ -101,3 +113,17 @@ jobs:
           echo "Run swc async"
           yarn swc src -d ./build/
           yarn swc spec -d ./build-spec/
+
+          tee spack.config.js <<EOF
+          module.exports = {
+            entry: {
+              web: __dirname + "/src/index.ts",
+            },
+            output: {
+              path: __dirname + "/out",
+            },
+          };
+          EOF
+
+          echo "Run spack"
+          yarn spack

@@ -1,4 +1,4 @@
-name: Test
+name: Integration
 
 on: [push, pull_request]
 
@@ -40,6 +40,7 @@ jobs:
           npm install
           npm install @swc/core @swc/cli
           npm link @swc/cli
+          npm install
 
           tee -a .swcrc <<EOF
             {
@@ -72,6 +73,7 @@ jobs:
           cd integration-tests/rxjs
           npm install
           npm install @swc/core @swc/cli
+          npm install
           npm link @swc/cli
 
           tee -a .swcrc <<EOF

@@ -41,8 +41,10 @@
   },
   "devDependencies": {
     "@swc/core": "^1.2.4",
+    "@swc/jest": "^0.1.2",
     "@types/convert-source-map": "^1.5.1",
     "@types/glob": "^7.1.2",
+    "@types/jest": "^26.0.23",
     "@types/lodash": "^4.14.155",
     "@types/node": "^12.19.16",
     "chokidar": "^3.5.1",

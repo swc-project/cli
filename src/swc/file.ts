@@ -102,10 +102,9 @@ export default async function ({
     );
   }
 
-  async function getProgram(previousResults: Map<string, swc.Output | Error> = new Map()) {
+  function getProgram(previousResults: Map<string, swc.Output | Error> = new Map()) {
     const results: typeof previousResults = new Map();
-
-    for (const filename of await util.globSources(cliOptions.filenames, cliOptions.includeDotfiles)) {
+    for (const filename of util.globSources(cliOptions.filenames, cliOptions.includeDotfiles)) {
       if (util.isCompilableExtension(filename, cliOptions.extensions)) {
         results.set(filename, previousResults.get(filename)!);
       }
@@ -114,7 +113,7 @@ export default async function ({
   }
 
   async function files() {
-    let results = await getProgram();
+    let results = getProgram();
     for (const filename of results.keys()) {
       try {
         const result = await handle(filename);
@@ -144,10 +143,10 @@ export default async function ({
             console.error(err.message);
           });
       });
-      watcher.on("add", async (filename) => {
+      watcher.on("add", (filename) => {
         if (util.isCompilableExtension(filename, cliOptions.extensions)) {
           // ensure consistent insertion order when files are added
-          results = await getProgram(results);
+          results = getProgram(results);
         }
       });
       watcher.on("unlink", (filename) => {

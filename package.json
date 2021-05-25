@@ -4,9 +4,13 @@
   "description": "CLI for the swc project",
   "main": "lib/swc/index.js",
   "scripts": {
-    "prepublishOnly": "yarn build && yarn test",
+    "prepublishOnly": "yarn build && yarn test && yarn types",
+    "types": "tsc",
+    "types:watch": "tsc --watch",
     "build": "swc src -d lib",
-    "test": "jest"
+    "build:watch": "swc src -d lib --watch",
+    "test": "jest",
+    "test:watch": "jest --watch"
   },
   "repository": {
     "type": "git",
@@ -52,6 +56,7 @@
     "@swc/core": "^1.2.4",
     "@swc/cli": "0.1.42",
     "@swc/jest": "^0.1.2",
+    "@types/jest": "^26.0.23",
     "@types/convert-source-map": "^1.5.1",
     "@types/jest": "^26.0.23",
     "@types/lodash": "^4.14.155",

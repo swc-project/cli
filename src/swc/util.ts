@@ -96,7 +96,7 @@ export async function compile(
   filename: string,
   opts: swc.Options,
   sync: boolean
-): Promise<swc.Output | undefined> {
+): Promise<swc.Output | void> {
   opts = {
     ...opts
   };

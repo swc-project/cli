@@ -5,7 +5,7 @@
   "main": "lib/swc/index.js",
   "scripts": {
     "prepublishOnly": "tsc -b tsconfig.build.json",
-    "build": "tsc -b tsconfig.build.json",
+    "build": "swc src -d lib",
     "test": "jest"
   },
   "repository": {
@@ -50,6 +50,7 @@
   },
   "devDependencies": {
     "@swc/core": "^1.2.4",
+    "@swc/cli": "0.1.42",
     "@swc/jest": "^0.1.2",
     "@types/convert-source-map": "^1.5.1",
     "@types/jest": "^26.0.23",

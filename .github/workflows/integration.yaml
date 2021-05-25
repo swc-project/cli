@@ -25,7 +25,6 @@ jobs:
 
       - name: Link
         run: |
-          yarn install --production
           yarn link
 
       - name: (swc + spack) three.js

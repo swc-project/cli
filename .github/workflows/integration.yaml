@@ -99,7 +99,7 @@ jobs:
       - name: (swc + spack) rxjs
         run: |
           checkBuild() {
-            SOURCE_JS_COUNT=$(find $1 -name "*.ts" | wc -l)
+            SOURCE_JS_COUNT=$(find $1 -name "*.ts" -o -name '*.js' | wc -l)
             BUILD_JS_COUNT=$(find $2 -name "*.js" | wc -l)
             echo "Compare $1 to $2"
             if [[ $SOURCE_JS_COUNT -ne $BUILD_JS_COUNT ]]
@@ -134,22 +134,22 @@ jobs:
 
           echo "Run swc sync"
           rm -rf build
-          yarn swc --sync src -d ./build/
+          yarn swc --sync src -d build
           checkBuild "src" "build"
 
           rm -rf build-spec
-          yarn swc --sync spec -d ./build-spec/
+          yarn swc --sync spec -d build-spec
           checkBuild "spec" "build-spec"
 
           rm -rf build 
 
           echo "Run swc async"
           rm -rf build
-          yarn swc src -d ./build/
+          yarn swc src -d build
           checkBuild "src" "build"
 
           rm -rf build-spec
-          yarn swc spec -d ./build-spec/
+          yarn swc spec -d build-spec
           checkBuild "spec" "build-spec"
 
           tee spack.config.js <<EOF

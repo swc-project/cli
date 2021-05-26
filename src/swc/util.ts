@@ -26,7 +26,7 @@ export function globSources(
         return [];
       }
       return stats.isDirectory()
-        ? glob.sync(path.join(filename, "**"), {
+        ? glob.sync(slash(path.join(filename, "**")), {
             dot: includeDotfiles,
             nodir: true
           })

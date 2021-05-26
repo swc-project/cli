@@ -35,7 +35,7 @@ export async function globSources(
             if (!stat.isDirectory()) {
               resolve([source])
             } else {
-              glob(path.join(source, "**"), globConfig)
+              glob(slash(path.join(source, "**")), globConfig)
                 .then((matches) => resolve(matches))
                 .catch(() => resolve([]))
             }

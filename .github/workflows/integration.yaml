@@ -199,7 +199,7 @@ jobs:
           cd integration-tests/three.js
           npm install @swc/core @swc/cli --save-dev
           npm install
-          yarn link @swc/cli
+          npm install ../../
 
           tee .swcrc <<EOF
           {

@@ -1,38 +1,50 @@
 import * as swc from "@swc/core";
 import convertSourceMap from 'convert-source-map';
-import fs from "fs";
-import glob from "glob";
-import uniq from "lodash/uniq";
+import { stat, chmodSync, statSync, mkdirSync, writeFileSync } from "fs";
+import type { PathLike } from 'fs';
+import glob from "fast-glob";
 import path from "path";
 import slash from "slash";
 
-export function chmod(src: fs.PathLike, dest: fs.PathLike) {
-  fs.chmodSync(dest, fs.statSync(src).mode);
+export function chmod(src: PathLike, dest: PathLike) {
+  chmodSync(dest, statSync(src).mode);
 }
 
-export function globSources(
+/**
+ * Find all input files based on source globs
+ */
+export async function globSources(
   sources: string[],
   includeDotfiles = false
-): string[] {
-  return uniq(
-    sources.flatMap(filename => {
-      if (!includeDotfiles && path.basename(filename).startsWith(".")) {
-        return [];
-      }
-      let stats: fs.Stats;
-      try {
-        stats = fs.statSync(filename);
-      } catch (err) {
-        return [];
-      }
-      return stats.isDirectory()
-        ? glob.sync(path.join(filename, "**"), {
-            dot: includeDotfiles,
-            nodir: true
-          })
-        : [filename];
-    })
+): Promise<Set<string>> {
+  const globConfig = {
+    dot: includeDotfiles,
+    nodir: true,
+  };
+
+  const files = await Promise.all(
+    sources
+      .filter(source => includeDotfiles || !path.basename(source).startsWith("."))
+      .map((source) => {
+        return new Promise<string[]>(resolve => {
+          stat(source, (err, stat) => {
+            if (err) {
+              resolve([]);
+              return;
+            }
+            if (!stat.isDirectory()) {
+              resolve([source])
+            } else {
+              glob(slash(path.join(source, "**")), globConfig)
+                .then((matches) => resolve(matches))
+                .catch(() => resolve([]))
+            }
+          });
+        });
+      })
   );
+
+  return new Set<string>(files.flat());
 }
 
 export function watchSources(
@@ -120,7 +132,7 @@ export function outputFile(
   sourceMaps: swc.Options['sourceMaps']
 ) {
   const destDir = path.dirname(filename);
-  fs.mkdirSync(destDir, { recursive: true });
+  mkdirSync(destDir, { recursive: true });
 
   let code = output.code;
   if (output.map && sourceMaps && sourceMaps !== "inline") {
@@ -128,10 +140,10 @@ export function outputFile(
     const fileDirName = path.dirname(filename);
     const mapLoc = filename + ".map";
     code += "\n//# sourceMappingURL=" + slash(path.relative(fileDirName, mapLoc));
-    fs.writeFileSync(mapLoc, output.map);
+    writeFileSync(mapLoc, output.map);
   }
 
-  fs.writeFileSync(filename, code);
+  writeFileSync(filename, code);
 }
 
 export function assertCompilationResult<T>(
@@ -170,7 +182,7 @@ export function requireChokidar(): (typeof import("chokidar")) {
   } catch (err) {
     console.error(
       "The optional dependency chokidar failed to install and is required for " +
-        "--watch. Chokidar is likely not supported on your platform."
+      "--watch. Chokidar is likely not supported on your platform."
     );
     throw err;
   }

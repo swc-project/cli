@@ -74,8 +74,6 @@ jobs:
           yarn swc --sync editor -d ./build-editor/
           checkBuild "editor" "build-editor"
 
-          ls -lR ./src/*.jpg | wc -l
-
           echo "Run swc async"
           rm -rf build 
           yarn swc src -d ./build/

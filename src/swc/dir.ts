@@ -1,6 +1,5 @@
 import * as swc from "@swc/core";
 import fs from "fs";
-import defaults from "lodash/defaults";
 import path from "path";
 import slash from "slash";
 
@@ -45,7 +44,7 @@ export default async function ({
 
       const result = await util.compile(
         filename,
-        defaults({ sourceFileName }, swcOptions),
+        { ...swcOptions, sourceFileName },
         cliOptions.sync
       );
 

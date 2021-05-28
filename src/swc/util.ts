@@ -1,5 +1,4 @@
 import * as swc from "@swc/core";
-import convertSourceMap from 'convert-source-map';
 import slash from "slash";
 import { chmodSync, statSync, mkdirSync, writeFileSync } from "fs";
 import { basename, dirname, relative, extname } from "path";
@@ -70,16 +69,16 @@ export async function compile(
       : await swc.transformFile(filename, opts);
 
     if (result.map) {
-      const map = convertSourceMap.fromJSON(result.map);
       // TODO: fix this in core
       // https://github.com/swc-project/swc/issues/1388
+      const sourceMap = JSON.parse(result.map);
       if (opts.sourceFileName) {
-        map.getProperty('sources')[0] = opts.sourceFileName;
+        sourceMap['sources'][0] = opts.sourceFileName;
       }
       if (opts.sourceRoot) {
-        map.setProperty('sourceRoot', opts.sourceRoot);
+        sourceMap['sourceRoot'] = opts.sourceRoot;
       }
-      result.map = map.toJSON();
+      result.map = JSON.stringify(sourceMap);
     }
     return result;
   } catch (err) {

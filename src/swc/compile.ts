@@ -1,9 +1,9 @@
-import { fromJSON } from 'convert-source-map';
+import slash from 'slash';
 import { promises } from "fs";
 import { dirname, relative } from "path";
 import { transformFile, transformFileSync } from "@swc/core";
 import type { Options, Output } from "@swc/core";
-import slash from 'slash';
+
 
 const {
   mkdir,
@@ -17,18 +17,18 @@ function getSourceMap(output: Output, options: Options, destFile: string) {
       sourceCode: output.code,
     }
   }
-  const sourceMap = fromJSON(output.map);
+  const sourceMap = JSON.parse(output.map);
   if (options.sourceFileName) {
-    sourceMap.getProperty('sources')[0] = options.sourceFileName;
+    sourceMap['sources'][0] = options.sourceFileName;
   }
   if (options.sourceRoot) {
-    sourceMap.setProperty('sourceRoot', options.sourceRoot);
+    sourceMap['sourceRoot'] = options.sourceRoot;
   }
-  output.map = sourceMap.toJSON();
+  output.map = JSON.stringify(sourceMap);
 
   const fileDirName = dirname(destFile);
   const mapLoc = destFile + ".map";
-  output.code += "\n//# sourceMappingURL=" + slash(relative(fileDirName, mapLoc));
+  output.code += `\n//# sourceMappingURL=${slash(relative(fileDirName, mapLoc))}`;
 
   return {
     sourceMap: output.map,

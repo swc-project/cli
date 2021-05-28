@@ -1,11 +1,11 @@
 import swc from "@swc/core";
 import convertSourceMap from 'convert-source-map';
-import defaults from "lodash/defaults";
 import path from "path";
 import slash from "slash";
 import { SourceMapConsumer, SourceMapGenerator } from "source-map";
 
 import { CliOptions } from "./options";
+import { globSources } from "./sources";
 import * as util from "./util";
 
 export default async function ({
@@ -88,16 +88,14 @@ export default async function ({
     );
     return await util.compile(
       filename,
-      defaults(
-        {
-          sourceFileName,
-          // Since we're compiling everything to be merged together,
-          // "inline" applies to the final output file, but not to the individual
-          // files being concatenated.
-          sourceMaps: Boolean(swcOptions.sourceMaps)
-        },
-        swcOptions
-      ),
+      {
+        sourceFileName,
+        // Since we're compiling everything to be merged together,
+        // "inline" applies to the final output file, but not to the individual
+        // files being concatenated.
+        sourceMaps: Boolean(swcOptions.sourceMaps),
+        ...swcOptions
+      },
       cliOptions.sync
     );
   }
@@ -105,7 +103,7 @@ export default async function ({
   async function getProgram(previousResults: Map<string, swc.Output | Error> = new Map()) {
     const results: typeof previousResults = new Map();
 
-    for (const filename of await util.globSources(cliOptions.filenames, cliOptions.includeDotfiles)) {
+    for (const filename of await globSources(cliOptions.filenames, cliOptions.includeDotfiles)) {
       if (util.isCompilableExtension(filename, cliOptions.extensions)) {
         results.set(filename, previousResults.get(filename)!);
       }
@@ -197,7 +195,7 @@ export default async function ({
     const res = await util.transform(
       cliOptions.filename,
       code,
-      defaults({ sourceFileName: "stdin" }, swcOptions),
+      { ...swcOptions, sourceFileName: "stdin" },
       cliOptions.sync
     );
 

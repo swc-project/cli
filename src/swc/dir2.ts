@@ -62,7 +62,7 @@ export default async function ({
     const dest = getDest(filename, outDir, ".js");
     const sourceFileName = slash(relative(dirname(dest), filename));
 
-    const options = { sourceFileName, ...swcOptions }
+    const options = { ...swcOptions, sourceFileName }
 
     const result = await compile(
       filename,

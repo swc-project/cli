@@ -1,6 +1,7 @@
-import { DEFAULT_EXTENSIONS, Options, version as swcCoreVersion } from "@swc/core";
+import { DEFAULT_EXTENSIONS, version as swcCoreVersion } from "@swc/core";
+import type { Options } from "@swc/core";
+
 import commander from "commander";
-import set from "lodash/set";
 
 const pkg = require("../../package.json");
 
@@ -213,7 +214,8 @@ export default function parserArgs(args: string[]) {
         key = cfg.substring(0, i);
         value = unstringify(cfg.substring(i + 1));
       }
-      set(swcOptions, key, value);
+      //@ts-expect-error
+      swcOptions[key] = value;
     }
   }
 

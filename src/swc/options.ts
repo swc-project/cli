@@ -143,6 +143,7 @@ export interface CliOptions {
 }
 
 export default function parserArgs(args: string[]) {
+  console.time('parseoptions')
   commander.parse(args);
   const opts = commander.opts();
 
@@ -231,7 +232,7 @@ export default function parserArgs(args: string[]) {
     quiet: !!opts.quiet,
     logWatchCompilation: !!opts.logWatchCompilation
   };
-
+  console.timeEnd('parseoptions')
   return {
     swcOptions,
     cliOptions

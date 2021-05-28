@@ -1,51 +1,14 @@
 import * as swc from "@swc/core";
 import convertSourceMap from 'convert-source-map';
-import glob from "fast-glob";
 import slash from "slash";
-import { stat, chmodSync, statSync, mkdirSync, writeFileSync } from "fs";
-import { join, basename, extname, dirname, relative } from "path";
+import { chmodSync, statSync, mkdirSync, writeFileSync } from "fs";
+import { basename, dirname, relative, extname } from "path";
 import type { PathLike } from 'fs';
 
 export function chmod(src: PathLike, dest: PathLike) {
   chmodSync(dest, statSync(src).mode);
 }
 
-/**
- * Find all input files based on source globs
- */
-export async function globSources(
-  sources: string[],
-  includeDotfiles = false
-): Promise<Set<string>> {
-  const globConfig = {
-    dot: includeDotfiles,
-    nodir: true,
-  };
-
-  const files = await Promise.all(
-    sources
-      .filter(source => includeDotfiles || !basename(source).startsWith("."))
-      .map((source) => {
-        return new Promise<string[]>(resolve => {
-          stat(source, (err, stat) => {
-            if (err) {
-              resolve([]);
-              return;
-            }
-            if (!stat.isDirectory()) {
-              resolve([source])
-            } else {
-              glob(slash(join(source, "**")), globConfig)
-                .then((matches) => resolve(matches))
-                .catch(() => resolve([]))
-            }
-          });
-        });
-      })
-  );
-
-  return new Set<string>(files.flat());
-}
 
 export function watchSources(
   sources: string[],
@@ -145,6 +108,7 @@ export function outputFile(
 
   writeFileSync(filename, code);
 }
+
 
 export function assertCompilationResult<T>(
   result: Map<string, Error | T>,

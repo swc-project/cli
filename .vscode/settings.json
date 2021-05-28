@@ -3,6 +3,7 @@
   "typescriptHero.imports.organizeOnSave": false,
   "cSpell.words": [
     "Dotfiles",
-    "nodir"
+    "nodir",
+    "swcrc"
   ]
 }

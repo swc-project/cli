@@ -5,6 +5,7 @@ import path from "path";
 import slash from "slash";
 
 import { CliOptions } from "./options";
+import { globSources } from "./sources";
 import * as util from "./util";
 
 export default async function ({
@@ -63,12 +64,15 @@ export default async function ({
   }
 
   if (cliOptions.deleteDirOnStart) {
+    console.log('clean dir1')
     fs.rmdirSync(cliOptions.outDir, { recursive: true })
   }
   fs.mkdirSync(cliOptions.outDir, { recursive: true });
 
+  console.time("Compilation dir1")
+
   const results = new Map<string, Error | boolean | 'copied'>();
-  for (const filename of await util.globSources(cliOptions.filenames, cliOptions.includeDotfiles)) {
+  for (const filename of await globSources(cliOptions.filenames, cliOptions.includeDotfiles)) {
     try {
       const result = await handle(filename);
       if (result !== undefined) {
@@ -127,5 +131,6 @@ export default async function ({
     }
   } else {
     util.assertCompilationResult(results, cliOptions.quiet);
+    console.timeEnd("Compilation dir1")
   }
 }

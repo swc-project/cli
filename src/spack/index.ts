@@ -10,7 +10,7 @@ const makeDir = promisify(mkdir);
 
 
 (async () => {
-    const { cliOptions, spackOptions } = await parseSpackArgs(process.argv);
+    const { spackOptions } = await parseSpackArgs(process.argv);
 
     function isUserDefinedEntry(name: string) {
         if (typeof spackOptions.entry === 'string') {

@@ -1,10 +1,10 @@
 import * as swc from "@swc/core";
 import convertSourceMap from 'convert-source-map';
-import { stat, chmodSync, statSync, mkdirSync, writeFileSync } from "fs";
-import type { PathLike } from 'fs';
 import glob from "fast-glob";
-import path from "path";
 import slash from "slash";
+import { stat, chmodSync, statSync, mkdirSync, writeFileSync } from "fs";
+import { join, basename, extname, dirname, relative } from "path";
+import type { PathLike } from 'fs';
 
 export function chmod(src: PathLike, dest: PathLike) {
   chmodSync(dest, statSync(src).mode);
@@ -24,7 +24,7 @@ export async function globSources(
 
   const files = await Promise.all(
     sources
-      .filter(source => includeDotfiles || !path.basename(source).startsWith("."))
+      .filter(source => includeDotfiles || !basename(source).startsWith("."))
       .map((source) => {
         return new Promise<string[]>(resolve => {
           stat(source, (err, stat) => {
@@ -35,7 +35,7 @@ export async function globSources(
             if (!stat.isDirectory()) {
               resolve([source])
             } else {
-              glob(slash(path.join(source, "**")), globConfig)
+              glob(slash(join(source, "**")), globConfig)
                 .then((matches) => resolve(matches))
                 .catch(() => resolve([]))
             }
@@ -54,7 +54,7 @@ export function watchSources(
   return requireChokidar().watch(sources, {
     ignored: includeDotfiles
       ? undefined
-      : (filename: string) => path.basename(filename).startsWith("."),
+      : (filename: string) => basename(filename).startsWith("."),
     ignoreInitial: true,
     awaitWriteFinish: {
       stabilityThreshold: 50,
@@ -70,7 +70,7 @@ export function isCompilableExtension(
   filename: string,
   altExts: string[]
 ): boolean {
-  const ext = path.extname(filename);
+  const ext = extname(filename);
   return altExts.includes(ext);
 }
 
@@ -96,7 +96,7 @@ export async function compile(
   filename: string,
   opts: swc.Options,
   sync: boolean
-): Promise<swc.Output | undefined> {
+): Promise<swc.Output | void> {
   opts = {
     ...opts
   };
@@ -131,15 +131,15 @@ export function outputFile(
   filename: string,
   sourceMaps: swc.Options['sourceMaps']
 ) {
-  const destDir = path.dirname(filename);
+  const destDir = dirname(filename);
   mkdirSync(destDir, { recursive: true });
 
   let code = output.code;
   if (output.map && sourceMaps && sourceMaps !== "inline") {
     // we've requested for a sourcemap to be written to disk
-    const fileDirName = path.dirname(filename);
+    const fileDirName = dirname(filename);
     const mapLoc = filename + ".map";
-    code += "\n//# sourceMappingURL=" + slash(path.relative(fileDirName, mapLoc));
+    code += "\n//# sourceMappingURL=" + slash(relative(fileDirName, mapLoc));
     writeFileSync(mapLoc, output.map);
   }
 

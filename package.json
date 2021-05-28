@@ -4,8 +4,13 @@
   "description": "CLI for the swc project",
   "main": "lib/swc/index.js",
   "scripts": {
-    "prepublishOnly": "tsc -b tsconfig.build.json",
-    "test": "jest"
+    "prepublishOnly": "yarn build && yarn test && yarn types",
+    "types": "tsc",
+    "types:watch": "tsc --watch",
+    "build": "swc src -d lib",
+    "build:watch": "swc src -d lib --watch",
+    "test": "jest",
+    "test:watch": "jest --watch"
   },
   "repository": {
     "type": "git",
@@ -30,25 +35,9 @@
   "engines": {
     "node": ">= 12.13"
   },
-  "peerDependencies": {
-    "@swc/core": "^1.2.4",
-    "chokidar": "^3.0.0"
-  },
-  "peerDependenciesMeta": {
-    "chokidar": {
-      "optional": true
-    }
-  },
-  "devDependencies": {
-    "@swc/core": "^1.2.4",
-    "@swc/jest": "^0.1.2",
-    "@types/convert-source-map": "^1.5.1",
-    "@types/jest": "^26.0.23",
-    "@types/lodash": "^4.14.155",
-    "@types/node": "^12.19.16",
-    "chokidar": "^3.5.1",
-    "jest": "^26.6.3",
-    "typescript": "~4.2.4"
+  "bin": {
+    "swc": "./bin/swc.js",
+    "spack": "./bin/spack.js"
   },
   "dependencies": {
     "commander": "^7.1.0",
@@ -58,9 +47,26 @@
     "slash": "3.0.0",
     "source-map": "^0.7.3"
   },
-  "bin": {
-    "swc": "./bin/swc.js",
-    "spack": "./bin/spack.js"
+  "devDependencies": {
+    "@swc/core": "^1.2.4",
+    "@swc/cli": "^0.1.43",
+    "@swc/jest": "^0.1.2",
+    "@types/jest": "^26.0.23",
+    "@types/convert-source-map": "^1.5.1",
+    "@types/lodash": "^4.14.155",
+    "@types/node": "^12.19.16",
+    "chokidar": "^3.5.1",
+    "jest": "^27.0.1",
+    "typescript": "~4.3.0"
+  },
+  "peerDependencies": {
+    "@swc/core": "^1.2.4",
+    "chokidar": "^3.5.1"
+  },
+  "peerDependenciesMeta": {
+    "chokidar": {
+      "optional": true
+    }
   },
   "files": [
     "bin",

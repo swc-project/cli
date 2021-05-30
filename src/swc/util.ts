@@ -1,7 +1,7 @@
 import * as swc from "@swc/core";
 import slash from "slash";
 import { chmodSync, statSync, mkdirSync, writeFileSync } from "fs";
-import { basename, dirname, relative, extname } from "path";
+import { dirname, relative } from "path";
 import type { PathLike } from 'fs';
 
 export function chmod(src: PathLike, dest: PathLike) {
@@ -9,32 +9,6 @@ export function chmod(src: PathLike, dest: PathLike) {
 }
 
 
-export function watchSources(
-  sources: string[],
-  includeDotfiles = false
-) {
-  return requireChokidar().watch(sources, {
-    ignored: includeDotfiles
-      ? undefined
-      : (filename: string) => basename(filename).startsWith("."),
-    ignoreInitial: true,
-    awaitWriteFinish: {
-      stabilityThreshold: 50,
-      pollInterval: 10
-    }
-  });
-}
-
-/**
- * Test if a filename ends with a compilable extension.
- */
-export function isCompilableExtension(
-  filename: string,
-  altExts: string[]
-): boolean {
-  const ext = extname(filename);
-  return altExts.includes(ext);
-}
 
 export async function transform(
   filename: string,
@@ -136,17 +110,5 @@ export function assertCompilationResult<T>(
     throw new Error(
       `Failed to compile ${failed} ${failed !== 1 ? "files" : "file"} with swc.`
     );
-  }
-}
-
-export function requireChokidar(): (typeof import("chokidar")) {
-  try {
-    return require("chokidar");
-  } catch (err) {
-    console.error(
-      "The optional dependency chokidar failed to install and is required for " +
-      "--watch. Chokidar is likely not supported on your platform."
-    );
-    throw err;
   }
 }

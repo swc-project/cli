@@ -2,9 +2,6 @@ import dirCommand from "./dir2";
 import fileCommand from "./file";
 import parseArgs from "./options";
 
-
-console.log("start", Date.now())
-
 const opts = parseArgs(process.argv);
 const fn = opts.cliOptions.outDir ? dirCommand : fileCommand;
 

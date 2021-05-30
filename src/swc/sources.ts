@@ -45,6 +45,18 @@ type Split = [
   copyable: string[]
 ]
 
+
+/**
+ * Test if a filename ends with a compilable extension.
+ */
+export function isCompilableExtension(
+  filename: string,
+  allowedExtension: string[]
+): boolean {
+  const ext = extname(filename);
+  return allowedExtension.includes(ext);
+}
+
 /**
  * Split file list to files that can be compiled and copied
  */
@@ -57,7 +69,7 @@ export function slitCompilableAndCopyable(
   const copyable: string[] = [];
 
   for (const file of files) {
-    const isCompilable = allowedExtension.includes(extname(file))
+    const isCompilable = isCompilableExtension(file, allowedExtension);
 
     if (isCompilable) {
       compilable.push(file)
@@ -69,3 +81,35 @@ export function slitCompilableAndCopyable(
   return [compilable, copyable];
 }
 
+export async function requireChokidar() {
+  try {
+    const { default: chokidar } = await import('chokidar');
+    return chokidar;
+  }
+  catch (err) {
+    console.error(
+      "The optional dependency chokidar is not installed and is required for " +
+      "--watch. Chokidar is likely not supported on your platform."
+    );
+    throw err;
+  }
+}
+
+export async function watchSources(
+  sources: string[],
+  includeDotfiles = false
+) {
+  const chokidar = await requireChokidar();
+
+  return chokidar.watch(sources, {
+    ignored: includeDotfiles
+      ? undefined
+      : (filename: string) => basename(filename).startsWith("."),
+    ignoreInitial: true,
+    awaitWriteFinish: {
+      stabilityThreshold: 50,
+      pollInterval: 10
+    }
+  });
+
+}

@@ -4,7 +4,7 @@ import path from "path";
 import slash from "slash";
 
 import { CliOptions } from "./options";
-import { globSources } from "./sources";
+import { globSources, isCompilableExtension, watchSources } from "./sources";
 import * as util from "./util";
 
 export default async function ({
@@ -38,7 +38,7 @@ export default async function ({
   }
 
   async function handle(filename: string) {
-    if (util.isCompilableExtension(filename, cliOptions.extensions)) {
+    if (isCompilableExtension(filename, cliOptions.extensions)) {
       const dest = getDest(filename, ".js");
       const sourceFileName = slash(path.relative(path.dirname(dest), filename));
 
@@ -84,7 +84,7 @@ export default async function ({
   }
 
   if (cliOptions.watch) {
-    const watcher = util.watchSources(cliOptions.filenames, cliOptions.includeDotfiles);
+    const watcher = await watchSources(cliOptions.filenames, cliOptions.includeDotfiles);
     watcher.on('ready', () => {
       try {
         util.assertCompilationResult(results, cliOptions.quiet);
@@ -97,7 +97,7 @@ export default async function ({
     });
     watcher.on('unlink', (filename) => {
       try {
-        if (util.isCompilableExtension(filename, cliOptions.extensions)) {
+        if (isCompilableExtension(filename, cliOptions.extensions)) {
           fs.unlinkSync(getDest(filename, ".js"));
         } else if (cliOptions.copyFiles) {
           fs.unlinkSync(getDest(filename));

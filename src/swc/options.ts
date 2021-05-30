@@ -1,56 +1,73 @@
+import commander from "commander";
 import { DEFAULT_EXTENSIONS, version as swcCoreVersion } from "@swc/core";
 import type { Options } from "@swc/core";
 
-import commander from "commander";
-
 const pkg = require("../../package.json");
 
-// Standard swc input configs.
 commander.option(
   "-f, --filename [filename]",
   "filename to use when reading from stdin - this will be used in source-maps, errors etc"
 );
 
-commander.option("--config-file [path]", "Path to a .swcrc file to use");
+commander.option(
+  "--config-file [path]",
+  "Path to a .swcrc file to use"
+);
+
 commander.option(
   "--env-name [name]",
   "The name of the 'env' to use when loading configs and plugins. " +
   "Defaults to the value of SWC_ENV, or else NODE_ENV, or else 'development'."
 );
 
-// commander.option(
-//     "--typescript",
-//     "Treat input as typescript",
-// );
+commander.option(
+  "--no-swcrc",
+  "Whether or not to look up .swcrc files"
+);
 
-// Basic file input configuration.
-commander.option("--no-swcrc", "Whether or not to look up .swcrc files");
+commander.option(
+  "--delete-dir-on-start",
+  "Whether or not delete output directory on start"
+);
 
 commander.option(
   "--ignore [list]",
   "list of glob paths to **not** compile",
   collect
 );
+
 commander.option(
   "--only [list]",
   "list of glob paths to **only** compile",
   collect
 );
 
-commander.option("-w, --watch", "Recompile files on changes");
+commander.option(
+  "-w, --watch",
+  "Recompile files on changes"
+);
 
-commander.option("-q, --quiet", "Suppress compilation output");
+commander.option(
+  "-q, --quiet",
+  "Suppress compilation output"
+);
 
-// General source map formatting.
-commander.option("-s, --source-maps [true|false|inline|both]", "generate source maps", unstringify);
+commander.option(
+  "-s, --source-maps [true|false|inline|both]",
+  "generate source maps",
+  unstringify
+);
+
 commander.option(
   "--source-map-target [string]",
   "set `file` on returned source map"
 );
+
 commander.option(
   "--source-file-name [string]",
   "set `sources[0]` on returned source map"
 );
+
 commander.option(
   "--source-root [filename]",
   "the root from which all sources are relative"
@@ -60,6 +77,7 @@ commander.option(
   "-o, --out-file [out]",
   "Compile all input files into a single file"
 );
+
 commander.option(
   "-d, --out-dir [out]",
   "Compile an input directory of modules into an output directory"
@@ -88,9 +106,9 @@ commander.option(
 
 commander.option(
   "--log-watch-compilation",
-  "Log a message when a watched file is successfully compiled"
+  "Log a message when a watched file is successfully compiled",
+  true
 );
-
 
 commander.option(
   "--extensions [list]",
@@ -98,10 +116,10 @@ commander.option(
   collect
 );
 
-commander.version(
-  `@swc/cli: ${pkg.version}
-@swc/core: ${swcCoreVersion}`
-);
+commander.version(`
+@swc/cli: ${pkg.version}
+@swc/core: ${swcCoreVersion}
+`);
 
 commander.usage("[options] <files ...>");
 
@@ -129,9 +147,7 @@ export interface CliOptions {
    * Invoke swc using transformSync. It's useful for debugging.
    */
   readonly sync: boolean;
-
   readonly sourceMapTarget: string;
-
   readonly filename: string;
   readonly filenames: string[];
   readonly extensions: string[];
@@ -230,7 +246,7 @@ export default function parserArgs(args: string[]) {
     watch: !!opts.watch,
     copyFiles: !!opts.copyFiles,
     includeDotfiles: !!opts.includeDotfiles,
-    deleteDirOnStart: !!opts.deleteDirOnStart,
+    deleteDirOnStart: Boolean(opts.deleteDirOnStart),
     quiet: !!opts.quiet,
     logWatchCompilation: !!opts.logWatchCompilation
   };

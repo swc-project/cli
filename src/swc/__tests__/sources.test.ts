@@ -66,3 +66,7 @@ describe('globSources', () => {
     ]);
   });
 });
+
+describe('slitCompilableAndCopyable', () => {
+
+})

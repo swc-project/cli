@@ -214,7 +214,6 @@ async function initialCompilation(cliOptions: CliOptions, swcOptions: Options) {
   }
 }
 
-
 async function watchCompilation(cliOptions: CliOptions, swcOptions: Options) {
   const {
     includeDotfiles,
@@ -275,7 +274,7 @@ async function watchCompilation(cliOptions: CliOptions, swcOptions: Options) {
   }
 }
 
-export default async function ({
+export default async function dir({
   cliOptions,
   swcOptions
 }: {

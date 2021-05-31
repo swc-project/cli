@@ -10,12 +10,13 @@ const {
   writeFile
 } = promises;
 
-function getSourceMap(output: Output, options: Options, destFile: string) {
+function withSourceMap(output: Output, options: Options, destFile: string, destDir: string) {
   if (!output.map || !options.sourceMaps || options.sourceMaps === "inline") {
     return {
       sourceCode: output.code,
     }
   }
+  // TODO: remove once fixed in core https://github.com/swc-project/swc/issues/1388
   const sourceMap = JSON.parse(output.map);
   if (options.sourceFileName) {
     sourceMap['sources'][0] = options.sourceFileName;
@@ -25,13 +26,12 @@ function getSourceMap(output: Output, options: Options, destFile: string) {
   }
   output.map = JSON.stringify(sourceMap);
 
-  const fileDirName = dirname(destFile);
-  const mapLoc = destFile + ".map";
-  output.code += `\n//# sourceMappingURL=${slash(relative(fileDirName, mapLoc))}`;
+  const sourceMapPath = destFile + ".map";
+  output.code += `\n//# sourceMappingURL=${slash(relative(destDir, sourceMapPath))}`;
 
   return {
     sourceMap: output.map,
-    sourceMapPath: mapLoc,
+    sourceMapPath,
     sourceCode: output.code
   }
 }
@@ -48,7 +48,7 @@ export async function outputResult(
     sourceMap,
     sourceMapPath,
     sourceCode
-  } = getSourceMap(output, options, destFile);
+  } = withSourceMap(output, options, destFile, destDir);
 
   await mkdir(destDir, { recursive: true });
   const { mode } = await stat(sourceFile);
@@ -62,7 +62,6 @@ export async function outputResult(
     ]);
   }
 }
-
 
 export async function compile(
   filename: string,

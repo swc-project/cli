@@ -159,7 +159,6 @@ export interface CliOptions {
 }
 
 export default function parserArgs(args: string[]) {
-  console.time('parseoptions')
   commander.parse(args);
   const opts = commander.opts();
 
@@ -246,7 +245,6 @@ export default function parserArgs(args: string[]) {
     deleteDirOnStart: Boolean(opts.deleteDirOnStart),
     quiet: !!opts.quiet,
   };
-  console.timeEnd('parseoptions')
   return {
     swcOptions,
     cliOptions

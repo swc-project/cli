@@ -1,5 +1,4 @@
 {
-    "exclude": "(__tests__|__mocks__)",
     "jsc": {
         "target": "es2019",
         "parser": {

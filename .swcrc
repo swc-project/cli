@@ -2,7 +2,8 @@
     "jsc": {
         "target": "es2019",
         "parser": {
-            "syntax": "typescript"
+            "syntax": "typescript",
+            "dynamicImport": true
         }
     },
     "module": {

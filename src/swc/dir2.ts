@@ -1,5 +1,5 @@
 import slash from "slash";
-import { promises } from "fs";
+import { existsSync, promises } from "fs";
 import { dirname, relative, join } from "path";
 import { CompileStatus } from "./constants";
 import { CliOptions } from "./options";
@@ -14,9 +14,20 @@ import {
 
 import type { Options } from "@swc/core";
 
+declare module "fs" {
+  namespace promises {
+    /**
+     * For node > 14 we want to use rm instead of rmdir
+     * We need to augment node v12 types
+     */
+    function rm(dir: string, option: object): void
+  }
+}
+
 const {
   mkdir,
   rmdir,
+  rm,
   copyFile,
   unlink,
 } = promises;
@@ -72,6 +83,7 @@ async function handleCopy(filename: string, outDir: string) {
   const dest = getDest(filename, outDir);
   const dir = dirname(dest);
 
+  console.log(filename)
   await mkdir(dir, recursive);
   await copyFile(filename, dest);
 
@@ -86,7 +98,12 @@ async function beforeStartCompilation(cliOptions: CliOptions) {
   } = cliOptions
 
   if (deleteDirOnStart) {
-    await rmdir(outDir, recursive);
+    const exists = await existsSync(outDir);
+    if (exists) {
+      rm
+        ? await rm(outDir, recursive)
+        : await rmdir(outDir, recursive)
+    }
   }
 }
 
@@ -98,9 +115,13 @@ async function initialCompilation(cliOptions: CliOptions, swcOptions: Options) {
     extensions,
     outDir,
     sync,
+    quiet,
+    watch,
   } = cliOptions;
+
   const results = new Map<string, CompileStatus>();
 
+  const start = process.hrtime();
   const sourceFiles = await globSources(filenames, includeDotfiles)
   const [
     compilable,
@@ -150,7 +171,7 @@ async function initialCompilation(cliOptions: CliOptions, swcOptions: Options) {
       });
     });
   }
-
+  const end = process.hrtime(start);
 
   let failed = 0;
   let compiled = 0;
@@ -172,13 +193,29 @@ async function initialCompilation(cliOptions: CliOptions, swcOptions: Options) {
         break;
     }
   }
-  console.timeEnd("Compilation")
-  console.log(`
-  failed: ${failed}
-  compiled: ${compiled}
-  copied: ${copied}
-  omitted: ${omitted}
-  `)
+
+  if (!quiet && compiled + copied) {
+    let message = "";
+    if (compiled) {
+      message += `Successfully compiled: ${compiled} ${compiled > 1 ? 'files' : 'file'}`
+    }
+    if (compiled && copied) {
+      message += ", ";
+    }
+    if (copied) {
+      message += `copied ${copied} ${copied > 1 ? 'files' : 'file'}`;
+    }
+    message += ` with swc (%dms)`;
+
+    console.log(message, (end[1] / 1000000).toFixed(2));
+  }
+
+  if (failed) {
+    console.log(`Failed to compile ${failed} ${failed !== 1 ? "files" : "file"} with swc.`)
+    if (!watch) {
+      throw new Error("Failed to compile");
+    }
+  }
 }
 
 
@@ -191,7 +228,6 @@ async function watchCompilation(cliOptions: CliOptions, swcOptions: Options) {
     outDir,
     quiet,
     sync,
-    logWatchCompilation
   } = cliOptions;
 
   const watcher = await watchSources(filenames, includeDotfiles);
@@ -217,25 +253,26 @@ async function watchCompilation(cliOptions: CliOptions, swcOptions: Options) {
     watcher.on(type, async (filename) => {
       if (isCompilableExtension(filename, extensions)) {
         try {
+          const start = process.hrtime();
           const result = await handleCompile(filename, outDir, sync, swcOptions);
-          if (logWatchCompilation) {
-
+          if (!quiet && result === CompileStatus.Compiled) {
+            const end = process.hrtime(start);
+            console.log(`Successfully compiled ${filename} with swc (%dms)`, (end[1] / 1000000).toFixed(2))
           }
         } catch (err) {
-          if (logWatchCompilation) {
-
-          }
+          console.error(err.message);
         }
       } else if (copyFiles) {
         try {
+          const start = process.hrtime();
           const result = await handleCopy(filename, outDir);
-          if (logWatchCompilation) {
-
+          if (!quiet && result === CompileStatus.Copied) {
+            const end = process.hrtime(start);
+            console.log(`Successfully copied ${filename} with swc (%dms)`, (end[1] / 1000000).toFixed(2))
           }
         } catch (err) {
-          if (logWatchCompilation) {
-
-          }
+          console.error(`Failed to copy ${filename}`);
+          console.error(err.message);
         }
       }
     });

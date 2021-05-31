@@ -68,8 +68,6 @@ export default async function ({
   }
   fs.mkdirSync(cliOptions.outDir, { recursive: true });
 
-  console.time("Compilation dir1")
-
   const results = new Map<string, Error | boolean | 'copied'>();
   for (const filename of await globSources(cliOptions.filenames, cliOptions.includeDotfiles)) {
     try {
@@ -115,7 +113,7 @@ export default async function ({
         handle(filename)
           .then((result) => {
             results.set(filename, result);
-            if (result && cliOptions.logWatchCompilation) {
+            if (result) {
               const [seconds, nanoseconds] = process.hrtime(start);
               const ms = seconds * 1000 + (nanoseconds * 1e-6);
               const name = path.basename(filename);

@@ -156,7 +156,6 @@ export interface CliOptions {
   readonly includeDotfiles: boolean;
   readonly deleteDirOnStart: boolean;
   readonly quiet: boolean;
-  readonly logWatchCompilation: boolean;
 }
 
 export default function parserArgs(args: string[]) {
@@ -183,8 +182,6 @@ export default function parserArgs(args: string[]) {
     if (!filenames.length) {
       errors.push("--watch requires filenames");
     }
-  } else if (opts.logWatchCompilation) {
-    errors.push("--log-watch-compilation requires --watch")
   }
 
   if (
@@ -248,7 +245,6 @@ export default function parserArgs(args: string[]) {
     includeDotfiles: !!opts.includeDotfiles,
     deleteDirOnStart: Boolean(opts.deleteDirOnStart),
     quiet: !!opts.quiet,
-    logWatchCompilation: !!opts.logWatchCompilation
   };
   console.timeEnd('parseoptions')
   return {

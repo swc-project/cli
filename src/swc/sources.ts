@@ -111,5 +111,4 @@ export async function watchSources(
       pollInterval: 10
     }
   });
-
 }

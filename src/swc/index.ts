@@ -1,4 +1,4 @@
-import dirCommand from "./dir2";
+import dirCommand from "./dir";
 import fileCommand from "./file";
 import parseArgs from "./options";
 

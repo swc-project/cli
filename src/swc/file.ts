@@ -169,7 +169,7 @@ export default async function ({
               results.set(filename, result);
               util.assertCompilationResult(results, true);
               await output(results.values());
-              if (cliOptions.logWatchCompilation) {
+              if (!cliOptions.quiet) {
                 const [seconds, nanoseconds] = process.hrtime(start);
                 const ms = seconds * 1000 + (nanoseconds * 1e-6);
                 const name = path.basename(cliOptions.outFile);

@@ -1,13 +1,7 @@
 import * as swc from "@swc/core";
 import slash from "slash";
-import { chmodSync, statSync, mkdirSync, writeFileSync } from "fs";
+import { mkdirSync, writeFileSync } from "fs";
 import { dirname, relative } from "path";
-import type { PathLike } from 'fs';
-
-export function chmod(src: PathLike, dest: PathLike) {
-  chmodSync(dest, statSync(src).mode);
-}
-
 
 
 export async function transform(

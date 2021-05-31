@@ -4,7 +4,6 @@ import { dirname, relative } from "path";
 import { transformFile, transformFileSync } from "@swc/core";
 import type { Options, Output } from "@swc/core";
 
-
 const {
   mkdir,
   stat,

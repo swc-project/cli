@@ -175,7 +175,6 @@ async function initialCompilation(cliOptions: CliOptions, swcOptions: Options) {
 
   let failed = 0;
   let compiled = 0;
-  let omitted = 0;
   let copied = 0;
   for (let [_, status] of results) {
     switch (status) {
@@ -187,9 +186,6 @@ async function initialCompilation(cliOptions: CliOptions, swcOptions: Options) {
         break;
       case CompileStatus.Copied:
         copied += 1;
-        break;
-      case CompileStatus.Omitted:
-        omitted += 1;
         break;
     }
   }

@@ -1,5 +1,4 @@
 import swc from "@swc/core";
-import convertSourceMap from 'convert-source-map';
 import path from "path";
 import slash from "slash";
 import { SourceMapConsumer, SourceMapGenerator } from "source-map";
@@ -75,7 +74,8 @@ export default async function ({
     } else {
       process.stdout.write(result.code + "\n");
       if (result.map) {
-        process.stdout.write(convertSourceMap.fromJSON(result.map).toComment());
+        const map = `//#sourceMappingURL=data:application/json;charset=utf-8;base64,${Buffer.from(JSON.stringify(result.map), 'utf8').toString('base64')}`
+        process.stdout.write(map);
       }
     }
   }

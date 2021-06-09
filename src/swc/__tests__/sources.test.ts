@@ -1,4 +1,4 @@
-import { globSources } from "../util";
+import { globSources, slitCompilableAndCopyable } from "../sources";
 import fs from 'fs'
 import glob from "fast-glob";
 
@@ -64,5 +64,30 @@ describe('globSources', () => {
     expect([...files]).toEqual([
       "file",
     ]);
+  });
+});
+
+describe('slitCompilableAndCopyable', () => {
+  const extensions = [".ts"]
+  it('separate compilable and copyable when copyFiles=true', () => {
+    const files = [
+      "test.ts",
+      "test.txt"
+    ];
+    const [compilable, copyable] = slitCompilableAndCopyable(files, extensions, true);
+
+    expect(compilable).toEqual(["test.ts"]);
+    expect(copyable).toEqual(["test.txt"]);
+  });
+
+  it('separate compilable and copyable when copyFiles=false', () => {
+    const files = [
+      "test.ts",
+      "test.txt"
+    ];
+    const [compilable, copyable] = slitCompilableAndCopyable(files, extensions, false);
+
+    expect(compilable).toEqual(["test.ts"]);
+    expect(copyable).toEqual([]);
   });
 });

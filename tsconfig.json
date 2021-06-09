@@ -9,6 +9,10 @@
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "esModuleInterop": true,
+    "lib": [
+      "ES2019.Array",
+      "ES2020.Promise"
+    ]
   },
   "include": [
     "src"

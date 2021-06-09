@@ -1,78 +1,8 @@
 import * as swc from "@swc/core";
-import convertSourceMap from 'convert-source-map';
-import glob from "fast-glob";
 import slash from "slash";
-import { stat, chmodSync, statSync, mkdirSync, writeFileSync } from "fs";
-import { join, basename, extname, dirname, relative } from "path";
-import type { PathLike } from 'fs';
+import { mkdirSync, writeFileSync } from "fs";
+import { dirname, relative } from "path";
 
-export function chmod(src: PathLike, dest: PathLike) {
-  chmodSync(dest, statSync(src).mode);
-}
-
-/**
- * Find all input files based on source globs
- */
-export async function globSources(
-  sources: string[],
-  includeDotfiles = false
-): Promise<Set<string>> {
-  const globConfig = {
-    dot: includeDotfiles,
-    nodir: true,
-  };
-
-  const files = await Promise.all(
-    sources
-      .filter(source => includeDotfiles || !basename(source).startsWith("."))
-      .map((source) => {
-        return new Promise<string[]>(resolve => {
-          stat(source, (err, stat) => {
-            if (err) {
-              resolve([]);
-              return;
-            }
-            if (!stat.isDirectory()) {
-              resolve([source])
-            } else {
-              glob(slash(join(source, "**")), globConfig)
-                .then((matches) => resolve(matches))
-                .catch(() => resolve([]))
-            }
-          });
-        });
-      })
-  );
-
-  return new Set<string>(files.flat());
-}
-
-export function watchSources(
-  sources: string[],
-  includeDotfiles = false
-) {
-  return requireChokidar().watch(sources, {
-    ignored: includeDotfiles
-      ? undefined
-      : (filename: string) => basename(filename).startsWith("."),
-    ignoreInitial: true,
-    awaitWriteFinish: {
-      stabilityThreshold: 50,
-      pollInterval: 10
-    }
-  });
-}
-
-/**
- * Test if a filename ends with a compilable extension.
- */
-export function isCompilableExtension(
-  filename: string,
-  altExts: string[]
-): boolean {
-  const ext = extname(filename);
-  return altExts.includes(ext);
-}
 
 export async function transform(
   filename: string,
@@ -107,16 +37,16 @@ export async function compile(
       : await swc.transformFile(filename, opts);
 
     if (result.map) {
-      const map = convertSourceMap.fromJSON(result.map);
       // TODO: fix this in core
       // https://github.com/swc-project/swc/issues/1388
+      const sourceMap = JSON.parse(result.map);
       if (opts.sourceFileName) {
-        map.getProperty('sources')[0] = opts.sourceFileName;
+        sourceMap['sources'][0] = opts.sourceFileName;
       }
       if (opts.sourceRoot) {
-        map.setProperty('sourceRoot', opts.sourceRoot);
+        sourceMap['sourceRoot'] = opts.sourceRoot;
       }
-      result.map = map.toJSON();
+      result.map = JSON.stringify(sourceMap);
     }
     return result;
   } catch (err) {
@@ -146,6 +76,7 @@ export function outputFile(
   writeFileSync(filename, code);
 }
 
+
 export function assertCompilationResult<T>(
   result: Map<string, Error | T>,
   quiet = false
@@ -173,17 +104,5 @@ export function assertCompilationResult<T>(
     throw new Error(
       `Failed to compile ${failed} ${failed !== 1 ? "files" : "file"} with swc.`
     );
-  }
-}
-
-export function requireChokidar(): (typeof import("chokidar")) {
-  try {
-    return require("chokidar");
-  } catch (err) {
-    console.error(
-      "The optional dependency chokidar failed to install and is required for " +
-      "--watch. Chokidar is likely not supported on your platform."
-    );
-    throw err;
   }
 }

@@ -41,9 +41,7 @@
   },
   "dependencies": {
     "commander": "^7.1.0",
-    "convert-source-map": "^1.6.0",
     "fast-glob": "^3.2.5",
-    "lodash": "^4.17.11",
     "slash": "3.0.0",
     "source-map": "^0.7.3"
   },
@@ -51,13 +49,11 @@
     "@swc/cli": "^0.1.43",
     "@swc/core": "^1.2.4",
     "@swc/jest": "^0.1.2",
-    "@types/convert-source-map": "^1.5.1",
     "@types/jest": "^26.0.23",
-    "@types/lodash": "^4.14.155",
     "@types/node": "^12.19.16",
     "chokidar": "^3.5.1",
-    "jest": "^27.0.1",
-    "typescript": "~4.3.0"
+    "jest": "^27.0.3",
+    "typescript": "~4.3.2"
   },
   "peerDependencies": {
     "@swc/core": "^1.2.4",

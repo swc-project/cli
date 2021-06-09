@@ -1,11 +1,10 @@
 import swc from "@swc/core";
-import convertSourceMap from 'convert-source-map';
-import defaults from "lodash/defaults";
 import path from "path";
 import slash from "slash";
 import { SourceMapConsumer, SourceMapGenerator } from "source-map";
 
 import { CliOptions } from "./options";
+import { globSources, isCompilableExtension, watchSources } from "./sources";
 import * as util from "./util";
 
 export default async function ({
@@ -75,7 +74,8 @@ export default async function ({
     } else {
       process.stdout.write(result.code + "\n");
       if (result.map) {
-        process.stdout.write(convertSourceMap.fromJSON(result.map).toComment());
+        const map = `//#sourceMappingURL=data:application/json;charset=utf-8;base64,${Buffer.from(JSON.stringify(result.map), 'utf8').toString('base64')}`
+        process.stdout.write(map);
       }
     }
   }
@@ -88,16 +88,15 @@ export default async function ({
     );
     return await util.compile(
       filename,
-      defaults(
-        {
-          sourceFileName,
-          // Since we're compiling everything to be merged together,
-          // "inline" applies to the final output file, but not to the individual
-          // files being concatenated.
-          sourceMaps: Boolean(swcOptions.sourceMaps)
-        },
-        swcOptions
-      ),
+      {
+        ...swcOptions,
+        sourceFileName,
+        // Since we're compiling everything to be merged together,
+        // "inline" applies to the final output file, but not to the individual
+        // files being concatenated.
+        sourceMaps: Boolean(swcOptions.sourceMaps),
+
+      },
       cliOptions.sync
     );
   }
@@ -105,8 +104,8 @@ export default async function ({
   async function getProgram(previousResults: Map<string, swc.Output | Error> = new Map()) {
     const results: typeof previousResults = new Map();
 
-    for (const filename of await util.globSources(cliOptions.filenames, cliOptions.includeDotfiles)) {
-      if (util.isCompilableExtension(filename, cliOptions.extensions)) {
+    for (const filename of await globSources(cliOptions.filenames, cliOptions.includeDotfiles)) {
+      if (isCompilableExtension(filename, cliOptions.extensions)) {
         results.set(filename, previousResults.get(filename)!);
       }
     }
@@ -130,7 +129,7 @@ export default async function ({
     }
 
     if (cliOptions.watch) {
-      const watcher = util.watchSources(cliOptions.filenames, cliOptions.includeDotfiles);
+      const watcher = await watchSources(cliOptions.filenames, cliOptions.includeDotfiles);
       watcher.on('ready', () => {
         Promise.resolve()
           .then(async () => {
@@ -145,7 +144,7 @@ export default async function ({
           });
       });
       watcher.on("add", async (filename) => {
-        if (util.isCompilableExtension(filename, cliOptions.extensions)) {
+        if (isCompilableExtension(filename, cliOptions.extensions)) {
           // ensure consistent insertion order when files are added
           results = await getProgram(results);
         }
@@ -155,7 +154,7 @@ export default async function ({
       });
       for (const type of ["add", "change"]) {
         watcher.on(type, (filename) => {
-          if (!util.isCompilableExtension(filename, cliOptions.extensions)) {
+          if (!isCompilableExtension(filename, cliOptions.extensions)) {
             return;
           }
 
@@ -170,7 +169,7 @@ export default async function ({
               results.set(filename, result);
               util.assertCompilationResult(results, true);
               await output(results.values());
-              if (cliOptions.logWatchCompilation) {
+              if (!cliOptions.quiet) {
                 const [seconds, nanoseconds] = process.hrtime(start);
                 const ms = seconds * 1000 + (nanoseconds * 1e-6);
                 const name = path.basename(cliOptions.outFile);
@@ -197,7 +196,10 @@ export default async function ({
     const res = await util.transform(
       cliOptions.filename,
       code,
-      defaults({ sourceFileName: "stdin" }, swcOptions),
+      {
+        ...swcOptions,
+        sourceFileName: "stdin"
+      },
       cliOptions.sync
     );
 

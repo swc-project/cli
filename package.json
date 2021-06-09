@@ -50,7 +50,7 @@
     "@swc/core": "^1.2.4",
     "@swc/jest": "^0.1.2",
     "@types/jest": "^26.0.23",
-    "@types/node": "^12.19.16",
+    "@types/node": "^15.12.2",
     "chokidar": "^3.5.1",
     "jest": "^27.0.3",
     "typescript": "~4.3.2"

@@ -33,7 +33,7 @@ const makeDir = promisify(mkdir);
         const bundleStart = process.hrtime();
         const output = await bundle(spackOptions);
         const bundleEnd = process.hrtime(bundleStart);
-        console.info(`Bindling done: ${bundleEnd[0]}s ${bundleEnd[1] / 1000000}ms`);
+        console.info(`Bundling done: ${bundleEnd[0]}s ${bundleEnd[1] / 1000000}ms`);
 
         const emitStart = process.hrtime();
         if (spackOptions.output?.path) {

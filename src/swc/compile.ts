@@ -69,7 +69,11 @@ export async function compile(
   sync: boolean,
   outputPath: string | undefined
 ): Promise<Output | void> {
-  const options = { ...opts, outputPath };
+  const options = { ...opts };
+  if (outputPath) {
+    options.outputPath = outputPath;
+  }
+
   try {
     const result = sync
       ? transformFileSync(filename, options)

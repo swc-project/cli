@@ -97,7 +97,8 @@ export default async function ({
         sourceMaps: Boolean(swcOptions.sourceMaps),
 
       },
-      cliOptions.sync
+      cliOptions.sync,
+      cliOptions.outFile
     );
   }
 
@@ -200,7 +201,8 @@ export default async function ({
         ...swcOptions,
         sourceFileName: "stdin"
       },
-      cliOptions.sync
+      cliOptions.sync,
+      undefined
     );
 
     output([res]);

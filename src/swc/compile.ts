@@ -66,12 +66,18 @@ export async function outputResult(
 export async function compile(
   filename: string,
   opts: Options,
-  sync: boolean
+  sync: boolean,
+  outputPath: string | undefined
 ): Promise<Output | void> {
+  const options = { ...opts };
+  if (outputPath) {
+    options.outputPath = outputPath;
+  }
+
   try {
     const result = sync
-      ? transformFileSync(filename, opts)
-      : await transformFile(filename, opts);
+      ? transformFileSync(filename, options)
+      : await transformFile(filename, options);
 
     return result;
   } catch (err) {

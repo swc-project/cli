@@ -11,7 +11,8 @@
     "esModuleInterop": true,
     "lib": [
       "ES2019.Array",
-      "ES2020.Promise"
+      "ES2020.Promise",
+      "ES2015"
     ]
   },
   "include": [

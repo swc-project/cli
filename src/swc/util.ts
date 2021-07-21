@@ -8,12 +8,17 @@ export async function transform(
   filename: string,
   code: string,
   opts: swc.Options,
-  sync: boolean
+  sync: boolean,
+  outputPath: string | undefined
 ): Promise<swc.Output> {
   opts = {
     filename,
-    ...opts
+    ...opts,
   };
+
+  if (outputPath) {
+    opts.outputPath = outputPath;
+  }
 
   if (sync) {
     return swc.transformSync(code, opts);
@@ -25,11 +30,15 @@ export async function transform(
 export async function compile(
   filename: string,
   opts: swc.Options,
-  sync: boolean
+  sync: boolean,
+  outputPath: string | undefined
 ): Promise<swc.Output | void> {
   opts = {
     ...opts
   };
+  if (outputPath) {
+    opts.outputPath = outputPath;
+  }
 
   try {
     const result = sync

@@ -68,7 +68,8 @@ async function handleCompile(filename: string, outDir: string, sync: boolean, sw
   const result = await compile(
     filename,
     options,
-    sync
+    sync,
+    dest
   );
 
   if (result) {

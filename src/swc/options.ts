@@ -154,14 +154,14 @@ function collect(value: string, previousValue?: string[]): string[] | undefined 
 }
 
 export interface CliOptions {
-  readonly outDir?: string;
-  readonly outFile?: string;
+  readonly outDir: string;
+  readonly outFile: string;
   /**
    * Invoke swc using transformSync. It's useful for debugging.
    */
   readonly sync: boolean;
   readonly sourceMapTarget?: string;
-  readonly filename?: string;
+  readonly filename: string;
   readonly filenames: string[];
   readonly extensions: string[];
   readonly watch: boolean;
@@ -239,8 +239,20 @@ export default function parserArgs(args: string[]) {
         key = cfg.substring(0, i);
         value = unstringify(cfg.substring(i + 1));
       }
-      //@ts-expect-error
-      swcOptions[key] = value;
+      // https://github.com/swc-project/cli/issues/45
+      let options = swcOptions as { [key: string]: any }
+      const keyParts = key.split('.')
+      const lastIndex = keyParts.length - 1
+      for (const [index, keyPart] of keyParts.entries()) {
+        if (options[keyPart] === undefined && index !== lastIndex) {
+          options[keyPart] = {}
+        }
+        if (index === lastIndex) {
+          options[keyPart] = value
+        } else {
+          options = options[keyPart]
+        }
+      }
     }
   }
 

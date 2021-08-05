@@ -4,124 +4,136 @@ import type { Options } from "@swc/core";
 
 const pkg = require("../../package.json");
 
-commander.option(
-  "-f, --filename [filename]",
-  "filename to use when reading from stdin - this will be used in source-maps, errors etc"
-);
+let program: commander.Command
 
-commander.option(
-  "--config-file [path]",
-  "Path to a .swcrc file to use"
-);
+export const initProgram = () => {
+  program = new commander.Command()
 
-commander.option(
-  "--env-name [name]",
-  "The name of the 'env' to use when loading configs and plugins. " +
-  "Defaults to the value of SWC_ENV, or else NODE_ENV, or else 'development'."
-);
+  /* istanbul ignore next */
+  if (process.env.NODE_ENV === 'test') {
+    program.exitOverride();
+  }
 
-commander.option(
-  "--no-swcrc",
-  "Whether or not to look up .swcrc files"
-);
 
-commander.option(
-  "--delete-dir-on-start",
-  "Whether or not delete output directory on start"
-);
+  program.option(
+    "-f, --filename [filename]",
+    "filename to use when reading from stdin - this will be used in source-maps, errors etc"
+  );
 
-commander.option(
-  "--ignore [list]",
-  "list of glob paths to **not** compile",
-  collect
-);
+  program.option(
+    "--config-file [path]",
+    "Path to a .swcrc file to use"
+  );
 
-commander.option(
-  "--only [list]",
-  "list of glob paths to **only** compile",
-  collect
-);
+  program.option(
+    "--env-name [name]",
+    "The name of the 'env' to use when loading configs and plugins. " +
+    "Defaults to the value of SWC_ENV, or else NODE_ENV, or else 'development'."
+  );
 
-commander.option(
-  "-w, --watch",
-  "Recompile files on changes"
-);
+  program.option(
+    "--no-swcrc",
+    "Whether or not to look up .swcrc files"
+  );
 
-commander.option(
-  "-q, --quiet",
-  "Suppress compilation output"
-);
+  program.option(
+    "--delete-dir-on-start",
+    "Whether or not delete output directory on start"
+  );
 
-commander.option(
-  "-s, --source-maps [true|false|inline|both]",
-  "generate source maps",
-  unstringify
-);
+  program.option(
+    "--ignore [list]",
+    "list of glob paths to **not** compile",
+    collect
+  );
 
-commander.option(
-  "--source-map-target [string]",
-  "set `file` on returned source map"
-);
+  program.option(
+    "--only [list]",
+    "list of glob paths to **only** compile",
+    collect
+  );
 
-commander.option(
-  "--source-file-name [string]",
-  "set `sources[0]` on returned source map"
-);
+  program.option(
+    "-w, --watch",
+    "Recompile files on changes"
+  );
 
-commander.option(
-  "--source-root [filename]",
-  "the root from which all sources are relative"
-);
+  program.option(
+    "-q, --quiet",
+    "Suppress compilation output"
+  );
 
-commander.option(
-  "-o, --out-file [out]",
-  "Compile all input files into a single file"
-);
+  program.option(
+    "-s, --source-maps [true|false|inline|both]",
+    "generate source maps",
+    unstringify
+  );
 
-commander.option(
-  "-d, --out-dir [out]",
-  "Compile an input directory of modules into an output directory"
-);
+  program.option(
+    "--source-map-target [string]",
+    "set `file` on returned source map"
+  );
 
-commander.option(
-  "-D, --copy-files",
-  "When compiling a directory copy over non-compilable files"
-);
-commander.option(
-  "--include-dotfiles",
-  "Include dotfiles when compiling and copying non-compilable files"
-);
+  program.option(
+    "--source-file-name [string]",
+    "set `sources[0]` on returned source map"
+  );
 
-commander.option(
-  "-C, --config <config>",
-  "Override a config from .swcrc file. e.g. -C module.type=amd -C module.moduleId=hello",
-  collect
-);
+  program.option(
+    "--source-root [filename]",
+    "the root from which all sources are relative"
+  );
 
-commander.option(
-  "--sync",
-  "Invoke swc synchronously. Useful for debugging.",
-  collect
-);
+  program.option(
+    "-o, --out-file [out]",
+    "Compile all input files into a single file"
+  );
 
-commander.option(
-  "--log-watch-compilation",
-  "Log a message when a watched file is successfully compiled",
-  true
-);
+  program.option(
+    "-d, --out-dir [out]",
+    "Compile an input directory of modules into an output directory"
+  );
 
-commander.option(
-  "--extensions [list]",
-  "Use specific extensions",
-  collect
-);
+  program.option(
+    "-D, --copy-files",
+    "When compiling a directory copy over non-compilable files"
+  );
+  program.option(
+    "--include-dotfiles",
+    "Include dotfiles when compiling and copying non-compilable files"
+  );
 
-commander.version(`
+  program.option(
+    "-C, --config <config>",
+    "Override a config from .swcrc file. e.g. -C module.type=amd -C module.moduleId=hello",
+    collect
+  );
+
+  program.option(
+    "--sync",
+    "Invoke swc synchronously. Useful for debugging.",
+    collect
+  );
+
+  program.option(
+    "--log-watch-compilation",
+    "Log a message when a watched file is successfully compiled",
+    true
+  );
+
+  program.option(
+    "--extensions [list]",
+    "Use specific extensions",
+    collect
+  );
+
+  program.version(`
 @swc/cli: ${pkg.version}
 @swc/core: ${swcCoreVersion}
 `);
 
-commander.usage("[options] <files ...>");
+  program.usage("[options] <files ...>");
+}
 
 function unstringify(val: string): any {
   try {
@@ -133,6 +145,7 @@ function unstringify(val: string): any {
 
 function collect(value: string, previousValue?: string[]): string[] | undefined {
   // If the user passed the option with no value, like "babel file.js --presets", do nothing.
+  /* istanbul ignore next */
   if (typeof value !== "string") return previousValue;
 
   const values = value.split(",");
@@ -159,10 +172,10 @@ export interface CliOptions {
 }
 
 export default function parserArgs(args: string[]) {
-  commander.parse(args);
-  const opts = commander.opts();
+  program.parse(args);
+  const opts = program.opts();
 
-  const filenames = commander.args;
+  const filenames = program.args;
   const errors = [];
 
   if (opts.outDir && !filenames.length) {

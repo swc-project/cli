@@ -1,7 +1,8 @@
 import dirCommand from "./dir";
 import fileCommand from "./file";
-import parseArgs from "./options";
+import parseArgs, { initProgram } from "./options";
 
+initProgram()
 const opts = parseArgs(process.argv);
 const fn = opts.cliOptions.outDir ? dirCommand : fileCommand;
 

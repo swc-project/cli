@@ -10,7 +10,8 @@
     "build": "swc src -d lib",
     "build:watch": "swc src -d lib --watch",
     "test": "jest",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "test:coverage": "JEST_COVERAGE=true jest --coverage"
   },
   "repository": {
     "type": "git",
@@ -53,6 +54,7 @@
     "@types/node": "^12.19.16",
     "chokidar": "^3.5.1",
     "jest": "^27.0.3",
+    "ts-jest": "^27.0.4",
     "typescript": "~4.3.2"
   },
   "peerDependencies": {

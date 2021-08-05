@@ -154,14 +154,14 @@ function collect(value: string, previousValue?: string[]): string[] | undefined 
 }
 
 export interface CliOptions {
-  readonly outDir: string;
-  readonly outFile: string;
+  readonly outDir?: string;
+  readonly outFile?: string;
   /**
    * Invoke swc using transformSync. It's useful for debugging.
    */
   readonly sync: boolean;
-  readonly sourceMapTarget: string;
-  readonly filename: string;
+  readonly sourceMapTarget?: string;
+  readonly filename?: string;
   readonly filenames: string[];
   readonly extensions: string[];
   readonly watch: boolean;

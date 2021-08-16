@@ -48,7 +48,7 @@
   "devDependencies": {
     "@swc/cli": "^0.1.43",
     "@swc/core": "^1.2.66",
-    "@swc/jest": "^0.1.2",
+    "@swc/jest": "^0.2.2",
     "@types/jest": "^26.0.23",
     "@types/node": "^12.19.16",
     "chokidar": "^3.5.1",

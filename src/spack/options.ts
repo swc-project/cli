@@ -13,9 +13,10 @@ commander.option("--config [path]", "Path to a spack.config.js file to use.");
 // TODO: allow using ts. See: https://github.com/swc-project/swc/issues/841
 
 commander.option("--mode <development | production | none>", "Mode to use");
+commander.option("--target [browser | node]", "Target runtime environment");
 
 commander.option(
-    '--context [path]', ` The base directory (absolute path!) for resolving the 'entry'`
+    '--context [path]', `The base directory (absolute path!) for resolving the 'entry'`
 + ` option. If 'output.pathinfo' is set, the included pathinfo is shortened to this directory`,
     'The current directory'
 );
@@ -178,6 +179,9 @@ export default async function parseSpackArgs(args: string[]): Promise<{
     }
     if (opts.mode) {
         configOpts.mode = opts.mode;
+    }
+    if (opts.target) {
+        configOpts.target = opts.target;
     }
     if (!configOpts.output) {
         configOpts.output = {} as any;

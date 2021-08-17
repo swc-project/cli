@@ -10,6 +10,7 @@ export interface SpackCliOptions {
 }
 
 commander.option("--config [path]", "Path to a spack.config.js file to use.");
+commander.option("--env [name=value...]", "Set environment variable(s).");
 // TODO: allow using ts. See: https://github.com/swc-project/swc/issues/841
 
 commander.option("--mode <development | production | none>", "Mode to use");
@@ -175,6 +176,15 @@ export default async function parseSpackArgs(args: string[]): Promise<{
     const configOpts: BundleOptions = await compileBundleOptions(opts.config ?? path.resolve('spack.config.js')) as any;
     if (opts.entry) {
         configOpts.entry = opts.entry;
+    }
+    if (opts.env) {
+        configOpts.env = configOpts.env || {};
+        const envArgs = opts.env.reduce((o, pair) => {
+          const [key, value] = pair.split("=");
+          o[key] = value || '';
+          return o;
+        }, {});
+        Object.assign(configOpts.env, envArgs);
     }
     if (opts.mode) {
         configOpts.mode = opts.mode;

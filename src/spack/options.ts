@@ -180,7 +180,7 @@ export default async function parseSpackArgs(args: string[]): Promise<{
     }
     if (opts.env) {
         configOpts.env = configOpts.env || {};
-        const envArgs = opts.env.reduce((o, pair) => {
+        const envArgs = opts.env.reduce((o: { [name: string]: string }, pair: string) => {
           const [key, value] = pair.split("=");
           o[key] = value || '';
           return o;

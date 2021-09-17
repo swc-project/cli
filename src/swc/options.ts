@@ -224,7 +224,8 @@ export default function parserArgs(args: string[]) {
     sourceMaps: opts.sourceMaps,
     sourceFileName: opts.sourceFileName,
     sourceRoot: opts.sourceRoot,
-    configFile: opts.configFile
+    configFile: opts.configFile,
+    swcrc: opts.swcrc
   };
 
   if (opts.config) {

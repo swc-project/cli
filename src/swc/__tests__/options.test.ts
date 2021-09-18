@@ -31,7 +31,8 @@ const createDefaultResult = (): ParserArgsReturn => ({
     "jsc": { "parser": undefined, "transform": {} },
     "sourceFileName": undefined,
     "sourceMaps": undefined,
-    "sourceRoot": undefined
+    "sourceRoot": undefined,
+    "swcrc": true
   }
 })
 

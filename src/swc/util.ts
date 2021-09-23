@@ -68,7 +68,7 @@ export async function compile(
 export function outputFile(
   output: swc.Output,
   filename: string,
-  sourceMaps: swc.Options['sourceMaps']
+  sourceMaps: undefined | swc.Options['sourceMaps']
 ) {
   const destDir = dirname(filename);
   mkdirSync(destDir, { recursive: true });

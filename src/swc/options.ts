@@ -220,13 +220,15 @@ export default function parserArgs(args: string[]) {
       parser: undefined,
       transform: {}
     },
-    // filename,
-    sourceMaps: opts.sourceMaps,
     sourceFileName: opts.sourceFileName,
     sourceRoot: opts.sourceRoot,
     configFile: opts.configFile,
     swcrc: opts.swcrc
   };
+
+  if (opts.sourceMaps !== undefined) {
+    swcOptions.sourceMaps = opts.sourceMaps;
+  }
 
   if (opts.config) {
     for (const cfg of opts.config as string[]) {

@@ -91,11 +91,6 @@ export default async function ({
       {
         ...swcOptions,
         sourceFileName,
-        // Since we're compiling everything to be merged together,
-        // "inline" applies to the final output file, but not to the individual
-        // files being concatenated.
-        sourceMaps: Boolean(swcOptions.sourceMaps),
-
       },
       cliOptions.sync,
       cliOptions.outFile

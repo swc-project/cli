@@ -74,7 +74,7 @@ export function outputFile(
   mkdirSync(destDir, { recursive: true });
 
   let code = output.code;
-  if (output.map && sourceMaps && sourceMaps !== "inline") {
+  if (output.map && sourceMaps !== "inline") {
     // we've requested for a sourcemap to be written to disk
     const fileDirName = dirname(filename);
     const mapLoc = filename + ".map";

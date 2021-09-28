@@ -11,7 +11,7 @@ const {
 } = promises;
 
 function withSourceMap(output: Output, options: Options, destFile: string, destDir: string) {
-  if (!output.map || !options.sourceMaps || options.sourceMaps === "inline") {
+  if (!output.map || options.sourceMaps === "inline") {
     return {
       sourceCode: output.code,
     }

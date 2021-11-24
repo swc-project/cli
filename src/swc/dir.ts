@@ -150,7 +150,10 @@ async function initialCompilation(cliOptions: CliOptions, swcOptions: Options) {
     }
   } else {
     await Promise.all([
-      Promise.allSettled(compilable.map(file => handleCompile(file, outDir, sync, swcOptions))),
+      Promise.allSettled(compilable.map(file => handleCompile(file, outDir, sync, swcOptions).catch((err) => {
+        console.error(err.message);
+        throw err;
+      }))),
       Promise.allSettled(copyable.map(file => handleCopy(file, outDir)))
     ]).then(([compiled, copied]) => {
       compiled.forEach((result, index) => {

@@ -164,6 +164,8 @@ export interface CliOptions {
   readonly filename: string;
   readonly filenames: string[];
   readonly extensions: string[];
+  readonly ignorePatterns: string[];
+  readonly onlyPatterns: string[];
   readonly watch: boolean;
   readonly copyFiles: boolean;
   readonly includeDotfiles: boolean;
@@ -272,6 +274,8 @@ export default function parserArgs(args: string[]) {
     includeDotfiles: !!opts.includeDotfiles,
     deleteDirOnStart: Boolean(opts.deleteDirOnStart),
     quiet: !!opts.quiet,
+    ignorePatterns: opts.ignore,
+    onlyPatterns: opts.only
   };
   return {
     swcOptions,

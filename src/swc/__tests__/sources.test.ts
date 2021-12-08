@@ -11,14 +11,14 @@ describe('globSources', () => {
   });
 
   it("exclude dotfiles sources when includeDotfiles=false", async () => {
-    const files = await globSources([".dotfile"], false);
+    const files = await globSources([".dotfile"], { includeDotfiles: false });
 
     expect([...files]).toEqual([]);
   });
 
   it("include dotfiles sources when includeDotfiles=true", async () => {
     (fs as any).setMockStats({ ".dotfile": { isDirectory: () => false } })
-    const files = await globSources([".dotfile"], true);
+    const files = await globSources([".dotfile"], { includeDotfiles: true });
 
     expect([...files]).toEqual([".dotfile"]);
   });
@@ -27,7 +27,7 @@ describe('globSources', () => {
   it("include multiple file sources", async () => {
     (fs as any).setMockStats({ ".dotfile": { isDirectory: () => false } });
     (fs as any).setMockStats({ "file": { isDirectory: () => false } });
-    const files = await globSources([".dotfile", "file"], true);
+    const files = await globSources([".dotfile", "file"], { includeDotfiles: true });
 
     expect([...files]).toEqual(['.dotfile', "file"]);
   });
@@ -35,7 +35,7 @@ describe('globSources', () => {
   it("exclude files that errors on stats", async () => {
     (fs as any).setMockStats({ ".dotfile": { isDirectory: () => false } });
     (fs as any).setMockStats({ "file": new Error('Failed stat') });
-    const files = await globSources([".dotfile", "file"], true);
+    const files = await globSources([".dotfile", "file"], { includeDotfiles: true });
 
     expect([...files]).toEqual(['.dotfile']);
   });
@@ -45,7 +45,7 @@ describe('globSources', () => {
     (fs as any).setMockStats({ "file": { isDirectory: () => false } });
 
     (glob as unknown as jest.Mock).mockResolvedValue(["fileDir1", "fileDir2"]);
-    const files = await globSources(["file", "directory"], true);
+    const files = await globSources(["file", "directory"], { includeDotfiles: true });
 
     expect([...files]).toEqual([
       "file",
@@ -59,10 +59,45 @@ describe('globSources', () => {
     (fs as any).setMockStats({ "file": { isDirectory: () => false } });
 
     (glob as unknown as jest.Mock).mockRejectedValue(new Error("Failed"));
-    const files = await globSources(["file", "directory"], true);
+    const files = await globSources(["file", "directory"], { includeDotfiles: true });
 
     expect([...files]).toEqual([
       "file",
+    ]);
+  });
+
+  it("ignore file by glob", async () => {
+    (fs as any).setMockStats({ "index.js": { isDirectory: () => false } });
+    (fs as any).setMockStats({ "index.spec.js": { isDirectory: () => false } });
+
+    const files = await globSources(["index.js", "index.spec.js"], { ignorePatterns: ["**/*.spec.js"] });
+
+    expect([...files]).toEqual([
+      "index.js",
+    ]);
+  });
+
+  it("inclide file by glob", async () => {
+    (fs as any).setMockStats({ "index.js": { isDirectory: () => false } });
+    (fs as any).setMockStats({ "index.spec.js": { isDirectory: () => false } });
+
+    const files = await globSources(["index.js", "index.spec.js"], { onlyPatterns: ["**/*.spec.js"] });
+
+    expect([...files]).toEqual([
+      "index.spec.js",
+    ]);
+  });
+
+  it("inclide files from dir by glob", async () => {
+    (fs as any).setMockStats({ "src": { isDirectory: () => true } });
+    (fs as any).setMockStats({ "src/index.js": { isDirectory: () => false } });
+    (fs as any).setMockStats({ "src/index.spec.js": { isDirectory: () => false } });
+
+    (glob as unknown as jest.Mock).mockResolvedValue(["src/index.js", "src/index.spec.js"]);
+    const files = await globSources(["src"], { onlyPatterns: ["**/*.spec.js"] });
+
+    expect([...files]).toEqual([
+      "src/index.spec.js",
     ]);
   });
 });

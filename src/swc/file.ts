@@ -100,7 +100,7 @@ export default async function ({
   async function getProgram(previousResults: Map<string, swc.Output | Error> = new Map()) {
     const results: typeof previousResults = new Map();
 
-    for (const filename of await globSources(cliOptions.filenames, cliOptions.includeDotfiles)) {
+    for (const filename of await globSources(cliOptions.filenames, cliOptions)) {
       if (isCompilableExtension(filename, cliOptions.extensions)) {
         results.set(filename, previousResults.get(filename)!);
       }
@@ -125,7 +125,7 @@ export default async function ({
     }
 
     if (cliOptions.watch) {
-      const watcher = await watchSources(cliOptions.filenames, cliOptions.includeDotfiles);
+      const watcher = await watchSources(cliOptions.filenames, cliOptions);
       watcher.on('ready', () => {
         Promise.resolve()
           .then(async () => {

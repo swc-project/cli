@@ -7,8 +7,8 @@
     "prepublishOnly": "yarn build && yarn test && yarn types",
     "types": "tsc",
     "types:watch": "tsc --watch",
-    "build": "swc src -d lib",
-    "build:watch": "swc src -d lib --watch",
+    "build": "swc src -d lib --ignore '**/*.test.ts' --ignore '**/__mocks__/**'",
+    "build:watch": "swc src -d lib --watch --ignore '**/*.test.ts' --ignore '**/__mocks__/**'",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "JEST_COVERAGE=true jest --coverage"
@@ -43,6 +43,7 @@
   "dependencies": {
     "commander": "^7.1.0",
     "fast-glob": "^3.2.5",
+    "micromatch": "^4.0.4",
     "slash": "3.0.0",
     "source-map": "^0.7.3"
   },
@@ -51,6 +52,7 @@
     "@swc/core": "^1.2.66",
     "@swc/jest": "^0.1.2",
     "@types/jest": "^26.0.23",
+    "@types/micromatch": "^4.0.2",
     "@types/node": "^12.19.16",
     "chokidar": "^3.5.1",
     "deepmerge": "^4.2.2",

@@ -50,7 +50,7 @@
   "devDependencies": {
     "@swc/cli": "^0.1.43",
     "@swc/core": "^1.2.66",
-    "@swc/jest": "^0.1.2",
+    "@swc/jest": "^0.2.12",
     "@types/jest": "^26.0.23",
     "@types/micromatch": "^4.0.2",
     "@types/node": "^12.19.16",

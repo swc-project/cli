@@ -4,37 +4,30 @@ import type { Options } from "@swc/core";
 
 const pkg = require("../../package.json");
 
-let program: commander.Command
+let program: commander.Command;
 
 export const initProgram = () => {
-  program = new commander.Command()
+  program = new commander.Command();
 
   /* istanbul ignore next */
-  if (process.env.NODE_ENV === 'test') {
+  if (process.env.NODE_ENV === "test") {
     program.exitOverride();
   }
-
 
   program.option(
     "-f, --filename [filename]",
     "filename to use when reading from stdin - this will be used in source-maps, errors etc"
   );
 
-  program.option(
-    "--config-file [path]",
-    "Path to a .swcrc file to use"
-  );
+  program.option("--config-file [path]", "Path to a .swcrc file to use");
 
   program.option(
     "--env-name [name]",
     "The name of the 'env' to use when loading configs and plugins. " +
-    "Defaults to the value of SWC_ENV, or else NODE_ENV, or else 'development'."
+      "Defaults to the value of SWC_ENV, or else NODE_ENV, or else 'development'."
   );
 
-  program.option(
-    "--no-swcrc",
-    "Whether or not to look up .swcrc files"
-  );
+  program.option("--no-swcrc", "Whether or not to look up .swcrc files");
 
   program.option(
     "--delete-dir-on-start",
@@ -53,15 +46,9 @@ export const initProgram = () => {
     collect
   );
 
-  program.option(
-    "-w, --watch",
-    "Recompile files on changes"
-  );
+  program.option("-w, --watch", "Recompile files on changes");
 
-  program.option(
-    "-q, --quiet",
-    "Suppress compilation output"
-  );
+  program.option("-q, --quiet", "Suppress compilation output");
 
   program.option(
     "-s, --source-maps [true|false|inline|both]",
@@ -121,11 +108,7 @@ export const initProgram = () => {
     true
   );
 
-  program.option(
-    "--extensions [list]",
-    "Use specific extensions",
-    collect
-  );
+  program.option("--extensions [list]", "Use specific extensions", collect);
 
   program.version(`
 @swc/cli: ${pkg.version}
@@ -133,7 +116,7 @@ export const initProgram = () => {
 `);
 
   program.usage("[options] <files ...>");
-}
+};
 
 function unstringify(val: string): any {
   try {
@@ -143,7 +126,10 @@ function unstringify(val: string): any {
   }
 }
 
-function collect(value: string, previousValue?: string[]): string[] | undefined {
+function collect(
+  value: string,
+  previousValue?: string[]
+): string[] | undefined {
   // If the user passed the option with no value, like "babel file.js --presets", do nothing.
   /* istanbul ignore next */
   if (typeof value !== "string") return previousValue;
@@ -220,12 +206,12 @@ export default function parserArgs(args: string[]) {
   const swcOptions: Options = {
     jsc: {
       parser: undefined,
-      transform: {}
+      transform: {},
     },
     sourceFileName: opts.sourceFileName,
     sourceRoot: opts.sourceRoot,
     configFile: opts.configFile,
-    swcrc: opts.swcrc
+    swcrc: opts.swcrc,
   };
 
   if (opts.sourceMaps !== undefined) {
@@ -245,17 +231,17 @@ export default function parserArgs(args: string[]) {
         value = unstringify(cfg.substring(i + 1));
       }
       // https://github.com/swc-project/cli/issues/45
-      let options = swcOptions as { [key: string]: any }
-      const keyParts = key.split('.')
-      const lastIndex = keyParts.length - 1
+      let options = swcOptions as { [key: string]: any };
+      const keyParts = key.split(".");
+      const lastIndex = keyParts.length - 1;
       for (const [index, keyPart] of keyParts.entries()) {
         if (options[keyPart] === undefined && index !== lastIndex) {
-          options[keyPart] = {}
+          options[keyPart] = {};
         }
         if (index === lastIndex) {
-          options[keyPart] = value
+          options[keyPart] = value;
         } else {
-          options = options[keyPart]
+          options = options[keyPart];
         }
       }
     }
@@ -275,10 +261,10 @@ export default function parserArgs(args: string[]) {
     deleteDirOnStart: Boolean(opts.deleteDirOnStart),
     quiet: !!opts.quiet,
     ignorePatterns: opts.ignore,
-    onlyPatterns: opts.only
+    onlyPatterns: opts.only,
   };
   return {
     swcOptions,
-    cliOptions
+    cliOptions,
   };
 }

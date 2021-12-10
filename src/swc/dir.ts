@@ -110,7 +110,6 @@ async function beforeStartCompilation(cliOptions: CliOptions) {
 
 async function initialCompilation(cliOptions: CliOptions, swcOptions: Options) {
   const {
-    includeDotfiles,
     filenames,
     copyFiles,
     extensions,
@@ -123,7 +122,7 @@ async function initialCompilation(cliOptions: CliOptions, swcOptions: Options) {
   const results = new Map<string, CompileStatus>();
 
   const start = process.hrtime();
-  const sourceFiles = await globSources(filenames, includeDotfiles)
+  const sourceFiles = await globSources(filenames, cliOptions);
   const [
     compilable,
     copyable
@@ -220,7 +219,6 @@ async function initialCompilation(cliOptions: CliOptions, swcOptions: Options) {
 
 async function watchCompilation(cliOptions: CliOptions, swcOptions: Options) {
   const {
-    includeDotfiles,
     filenames,
     copyFiles,
     extensions,
@@ -229,7 +227,7 @@ async function watchCompilation(cliOptions: CliOptions, swcOptions: Options) {
     sync,
   } = cliOptions;
 
-  const watcher = await watchSources(filenames, includeDotfiles);
+  const watcher = await watchSources(filenames, cliOptions);
   watcher.on('ready', () => {
     if (!quiet) {
       console.info('Watching for file changes.')

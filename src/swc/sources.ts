@@ -1,18 +1,27 @@
 import glob from "fast-glob";
+import micromatch from "micromatch";
 import slash from "slash";
 import { stat } from 'fs';
 import { join, basename, extname } from "path";
+import { CliOptions } from "./options";
+
+type GlobSourcesOptions = Partial<Pick<CliOptions, 'includeDotfiles' | 'ignorePatterns' | 'onlyPatterns'>>
 
 /**
  * Find all input files based on source globs
  */
 export async function globSources(
   sources: string[],
-  includeDotfiles = false
+  options: GlobSourcesOptions = {}
 ): Promise<string[]> {
+  const {
+    includeDotfiles = false,
+    ignorePatterns = [],
+    onlyPatterns = []
+  } = options;
   const globConfig = {
     dot: includeDotfiles,
-    nodir: true,
+    ignore: ignorePatterns
   };
 
   const files = await Promise.all(
@@ -20,17 +29,24 @@ export async function globSources(
       .filter(source => includeDotfiles || !basename(source).startsWith("."))
       .map((source) => {
         return new Promise<string[]>(resolve => {
-          stat(source, (err, stat) => {
+          stat(source, async (err, stat) => {
             if (err) {
               resolve([]);
               return;
             }
             if (!stat.isDirectory()) {
-              resolve([source])
+              resolve(micromatch([source], onlyPatterns.length ? onlyPatterns : ["**/*"], globConfig));
             } else {
-              glob(slash(join(source, "**")), globConfig)
-                .then((matches) => resolve(matches))
-                .catch(() => resolve([]))
+              try {
+                const matches = await glob(slash(join(source, "**")), globConfig);
+                const finalMatches = onlyPatterns.length
+                  ? micromatch(matches, onlyPatterns, globConfig)
+                  : matches;
+
+                resolve(finalMatches);
+              } catch (err) {
+                resolve([]);
+              }
             }
           });
         });
@@ -97,14 +113,24 @@ export async function requireChokidar() {
 
 export async function watchSources(
   sources: string[],
-  includeDotfiles = false
+  options: GlobSourcesOptions = {}
 ) {
+  const {
+    includeDotfiles = false,
+    ignorePatterns = [],
+    onlyPatterns = []
+  } = options;
+  const globConfig = {
+    dot: includeDotfiles
+  };
   const chokidar = await requireChokidar();
 
   return chokidar.watch(sources, {
-    ignored: includeDotfiles
-      ? undefined
-      : (filename: string) => basename(filename).startsWith("."),
+    ignored: [
+      !includeDotfiles && ((filename: string) => basename(filename).startsWith(".")),
+      ...ignorePatterns,
+      onlyPatterns.length && ((filename: string) => !micromatch.isMatch(filename, onlyPatterns, globConfig)),
+    ].filter(Boolean),
     ignoreInitial: true,
     awaitWriteFinish: {
       stabilityThreshold: 50,

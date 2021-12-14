@@ -1,1 +1,1 @@
-console.log("initializing");
+console.log('initializing')

@@ -9,7 +9,7 @@ import * as util from "./util";
 
 export default async function ({
   cliOptions,
-  swcOptions,
+  swcOptions
 }: {
   cliOptions: CliOptions;
   swcOptions: swc.Options;
@@ -20,7 +20,7 @@ export default async function ({
   ): Promise<swc.Output> {
     const map = new SourceMapGenerator({
       file,
-      sourceRoot: swcOptions.sourceRoot,
+      sourceRoot: swcOptions.sourceRoot
     });
 
     let code = "";
@@ -38,13 +38,13 @@ export default async function ({
           map.addMapping({
             generated: {
               line: mapping.generatedLine + offset,
-              column: mapping.generatedColumn,
+              column: mapping.generatedColumn
             },
             original: {
               line: mapping.originalLine,
-              column: mapping.originalColumn,
+              column: mapping.originalColumn
             },
-            source: mapping.source,
+            source: mapping.source
           });
         });
 
@@ -60,14 +60,12 @@ export default async function ({
 
     return {
       code,
-      map: JSON.stringify(map),
+      map: JSON.stringify(map)
     };
   }
 
   async function output(results: Iterable<swc.Output>) {
-    const file =
-      cliOptions.sourceMapTarget ||
-      path.basename(cliOptions.outFile || "stdout");
+    const file = cliOptions.sourceMapTarget || path.basename(cliOptions.outFile || "stdout");
 
     const result = await concatResults(file, ...results);
 
@@ -76,10 +74,7 @@ export default async function ({
     } else {
       process.stdout.write(result.code + "\n");
       if (result.map) {
-        const map = `//#sourceMappingURL=data:application/json;charset=utf-8;base64,${Buffer.from(
-          JSON.stringify(result.map),
-          "utf8"
-        ).toString("base64")}`;
+        const map = `//#sourceMappingURL=data:application/json;charset=utf-8;base64,${Buffer.from(JSON.stringify(result.map), 'utf8').toString('base64')}`
         process.stdout.write(map);
       }
     }
@@ -102,15 +97,10 @@ export default async function ({
     );
   }
 
-  async function getProgram(
-    previousResults: Map<string, swc.Output | Error> = new Map()
-  ) {
+  async function getProgram(previousResults: Map<string, swc.Output | Error> = new Map()) {
     const results: typeof previousResults = new Map();
 
-    for (const filename of await globSources(
-      cliOptions.filenames,
-      cliOptions
-    )) {
+    for (const filename of await globSources(cliOptions.filenames, cliOptions)) {
       if (isCompilableExtension(filename, cliOptions.extensions)) {
         results.set(filename, previousResults.get(filename)!);
       }
@@ -136,30 +126,30 @@ export default async function ({
 
     if (cliOptions.watch) {
       const watcher = await watchSources(cliOptions.filenames, cliOptions);
-      watcher.on("ready", () => {
+      watcher.on('ready', () => {
         Promise.resolve()
           .then(async () => {
             util.assertCompilationResult(results, cliOptions.quiet);
             await output(results.values());
             if (!cliOptions.quiet) {
-              console.info("Watching for file changes.");
+              console.info('Watching for file changes.')
             }
           })
-          .catch(err => {
+          .catch((err) => {
             console.error(err.message);
           });
       });
-      watcher.on("add", async filename => {
+      watcher.on("add", async (filename) => {
         if (isCompilableExtension(filename, cliOptions.extensions)) {
           // ensure consistent insertion order when files are added
           results = await getProgram(results);
         }
       });
-      watcher.on("unlink", filename => {
+      watcher.on("unlink", (filename) => {
         results.delete(filename);
       });
       for (const type of ["add", "change"]) {
-        watcher.on(type, filename => {
+        watcher.on(type, (filename) => {
           if (!isCompilableExtension(filename, cliOptions.extensions)) {
             return;
           }
@@ -167,7 +157,7 @@ export default async function ({
           const start = process.hrtime();
 
           handle(filename)
-            .then(async result => {
+            .then(async (result) => {
               if (!result) {
                 results.delete(filename);
                 return;
@@ -177,12 +167,12 @@ export default async function ({
               await output(results.values());
               if (!cliOptions.quiet) {
                 const [seconds, nanoseconds] = process.hrtime(start);
-                const ms = seconds * 1000 + nanoseconds * 1e-6;
+                const ms = seconds * 1000 + (nanoseconds * 1e-6);
                 const name = path.basename(cliOptions.outFile);
                 console.log(`Compiled ${name} in ${ms.toFixed(2)}ms`);
               }
             })
-            .catch(err => {
+            .catch((err) => {
               console.error(err.message);
             });
         });
@@ -204,7 +194,7 @@ export default async function ({
       code,
       {
         ...swcOptions,
-        sourceFileName: "stdin",
+        sourceFileName: "stdin"
       },
       cliOptions.sync,
       undefined

@@ -3,6 +3,7 @@ import slash from "slash";
 import { mkdirSync, writeFileSync } from "fs";
 import { dirname, relative } from "path";
 
+
 export async function transform(
   filename: string,
   code: string,
@@ -33,7 +34,7 @@ export async function compile(
   outputPath: string | undefined
 ): Promise<swc.Output | void> {
   opts = {
-    ...opts,
+    ...opts
   };
   if (outputPath) {
     opts.outputPath = outputPath;
@@ -49,10 +50,10 @@ export async function compile(
       // https://github.com/swc-project/swc/issues/1388
       const sourceMap = JSON.parse(result.map);
       if (opts.sourceFileName) {
-        sourceMap["sources"][0] = opts.sourceFileName;
+        sourceMap['sources'][0] = opts.sourceFileName;
       }
       if (opts.sourceRoot) {
-        sourceMap["sourceRoot"] = opts.sourceRoot;
+        sourceMap['sourceRoot'] = opts.sourceRoot;
       }
       result.map = JSON.stringify(sourceMap);
     }
@@ -67,7 +68,7 @@ export async function compile(
 export function outputFile(
   output: swc.Output,
   filename: string,
-  sourceMaps: undefined | swc.Options["sourceMaps"]
+  sourceMaps: undefined | swc.Options['sourceMaps']
 ) {
   const destDir = dirname(filename);
   mkdirSync(destDir, { recursive: true });
@@ -84,6 +85,7 @@ export function outputFile(
   writeFileSync(filename, code);
 }
 
+
 export function assertCompilationResult<T>(
   result: Map<string, Error | T>,
   quiet = false
@@ -94,7 +96,7 @@ export function assertCompilationResult<T>(
   for (const value of result.values()) {
     if (value instanceof Error) {
       failed++;
-    } else if ((value as unknown) === "copied") {
+    } else if (value as unknown === 'copied') {
       copied++;
     } else if (value) {
       compiled++;
@@ -103,9 +105,7 @@ export function assertCompilationResult<T>(
   if (!quiet && compiled + copied > 0) {
     const copyResult = copied === 0 ? " " : ` (copied ${copied}) `;
     console.info(
-      `Successfully compiled ${compiled} ${
-        compiled !== 1 ? "files" : "file"
-      }${copyResult}with swc.`
+      `Successfully compiled ${compiled} ${compiled !== 1 ? "files" : "file"}${copyResult}with swc.`
     );
   }
 

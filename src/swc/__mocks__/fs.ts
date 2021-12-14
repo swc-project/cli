@@ -1,14 +1,15 @@
-import fs from "fs";
+import fs from 'fs';
 import type { Stats } from "fs";
+
 
 export interface MockHelpers {
   resetMockStats: () => void;
   setMockStats: (stats: Record<string, Stats | Error>) => void;
 }
 
-const fsMock = jest.createMockFromModule<typeof fs & MockHelpers>("fs");
+const fsMock = jest.createMockFromModule<typeof fs & MockHelpers>('fs');
 
-let mockStats: Record<string, Stats | Error> = {};
+let mockStats: Record<string, Stats | Error> = {}
 
 function setMockStats(stats: Record<string, Stats | Error>) {
   Object.entries(stats).forEach(([path, stats]) => {

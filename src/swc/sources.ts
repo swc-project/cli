@@ -1,13 +1,11 @@
 import glob from "fast-glob";
 import micromatch from "micromatch";
 import slash from "slash";
-import { stat } from "fs";
+import { stat } from 'fs';
 import { join, basename, extname } from "path";
 import { CliOptions } from "./options";
 
-type GlobSourcesOptions = Partial<
-  Pick<CliOptions, "includeDotfiles" | "ignorePatterns" | "onlyPatterns">
->;
+type GlobSourcesOptions = Partial<Pick<CliOptions, 'includeDotfiles' | 'ignorePatterns' | 'onlyPatterns'>>
 
 /**
  * Find all input files based on source globs
@@ -19,17 +17,17 @@ export async function globSources(
   const {
     includeDotfiles = false,
     ignorePatterns = [],
-    onlyPatterns = [],
+    onlyPatterns = []
   } = options;
   const globConfig = {
     dot: includeDotfiles,
-    ignore: ignorePatterns,
+    ignore: ignorePatterns
   };
 
   const files = await Promise.all(
     sources
       .filter(source => includeDotfiles || !basename(source).startsWith("."))
-      .map(source => {
+      .map((source) => {
         return new Promise<string[]>(resolve => {
           stat(source, async (err, stat) => {
             if (err) {
@@ -37,19 +35,10 @@ export async function globSources(
               return;
             }
             if (!stat.isDirectory()) {
-              resolve(
-                micromatch(
-                  [source],
-                  onlyPatterns.length ? onlyPatterns : ["**/*"],
-                  globConfig
-                )
-              );
+              resolve(micromatch([source], onlyPatterns.length ? onlyPatterns : ["**/*"], globConfig));
             } else {
               try {
-                const matches = await glob(
-                  slash(join(source, "**")),
-                  globConfig
-                );
+                const matches = await glob(slash(join(source, "**")), globConfig);
                 const finalMatches = onlyPatterns.length
                   ? micromatch(matches, onlyPatterns, globConfig)
                   : matches;
@@ -67,7 +56,11 @@ export async function globSources(
   return Array.from(new Set<string>(files.flat()));
 }
 
-type Split = [compilable: string[], copyable: string[]];
+type Split = [
+  compilable: string[],
+  copyable: string[]
+]
+
 
 /**
  * Test if a filename ends with a compilable extension.
@@ -95,9 +88,9 @@ export function slitCompilableAndCopyable(
     const isCompilable = isCompilableExtension(file, allowedExtension);
 
     if (isCompilable) {
-      compilable.push(file);
+      compilable.push(file)
     } else if (copyFiles) {
-      copyable.push(file);
+      copyable.push(file)
     }
   }
 
@@ -106,12 +99,13 @@ export function slitCompilableAndCopyable(
 
 export async function requireChokidar() {
   try {
-    const { default: chokidar } = await import("chokidar");
+    const { default: chokidar } = await import('chokidar');
     return chokidar;
-  } catch (err) {
+  }
+  catch (err) {
     console.error(
       "The optional dependency chokidar is not installed and is required for " +
-        "--watch. Chokidar is likely not supported on your platform."
+      "--watch. Chokidar is likely not supported on your platform."
     );
     throw err;
   }
@@ -124,26 +118,23 @@ export async function watchSources(
   const {
     includeDotfiles = false,
     ignorePatterns = [],
-    onlyPatterns = [],
+    onlyPatterns = []
   } = options;
   const globConfig = {
-    dot: includeDotfiles,
+    dot: includeDotfiles
   };
   const chokidar = await requireChokidar();
 
   return chokidar.watch(sources, {
     ignored: [
-      !includeDotfiles &&
-        ((filename: string) => basename(filename).startsWith(".")),
+      !includeDotfiles && ((filename: string) => basename(filename).startsWith(".")),
       ...ignorePatterns,
-      onlyPatterns.length &&
-        ((filename: string) =>
-          !micromatch.isMatch(filename, onlyPatterns, globConfig)),
+      onlyPatterns.length && ((filename: string) => !micromatch.isMatch(filename, onlyPatterns, globConfig)),
     ].filter(Boolean),
     ignoreInitial: true,
     awaitWriteFinish: {
       stabilityThreshold: 50,
-      pollInterval: 10,
-    },
+      pollInterval: 10
+    }
   });
 }

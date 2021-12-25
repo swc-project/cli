@@ -60,7 +60,7 @@ export default async function ({
 
     return {
       code,
-      map: JSON.stringify(map),
+      map: map,
     };
   }
 

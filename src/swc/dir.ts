@@ -77,7 +77,6 @@ async function handleCopy(filename: string, outDir: string) {
   const dest = getDest(filename, outDir);
   const dir = dirname(dest);
 
-  console.log(filename);
   await mkdir(dir, recursive);
   await copyFile(filename, dest);
 

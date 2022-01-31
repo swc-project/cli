@@ -45,7 +45,7 @@
     "spack": "./bin/spack.js"
   },
   "dependencies": {
-    "commander": "^7.1.0",
+    "commander": "^9.0.0",
     "fast-glob": "^3.2.5",
     "slash": "3.0.0",
     "source-map": "^0.7.3"

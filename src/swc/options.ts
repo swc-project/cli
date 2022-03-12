@@ -19,6 +19,8 @@ export const initProgram = () => {
     "filename to use when reading from stdin - this will be used in source-maps, errors etc"
   );
 
+  program.option("--cwd [path]", "Specify the current working directory");
+
   program.option("--config-file [path]", "Path to a .swcrc file to use");
 
   program.option(
@@ -140,6 +142,7 @@ function collect(
 }
 
 export interface CliOptions {
+  readonly cwd: string;
   readonly outDir: string;
   readonly outFile: string;
   /**
@@ -246,6 +249,7 @@ export default function parserArgs(args: string[]) {
   }
 
   const cliOptions: CliOptions = {
+    cwd: opts.cwd,
     outDir: opts.outDir,
     outFile: opts.outFile,
     filename: opts.filename,

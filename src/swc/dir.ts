@@ -1,6 +1,6 @@
 import slash from "slash";
 import { existsSync, promises } from "fs";
-import { dirname, relative, join } from "path";
+import { dirname, relative, join, isAbsolute, resolve } from "path";
 import { CompileStatus } from "./constants";
 import { CliOptions } from "./options";
 import { compile } from "./util";
@@ -11,6 +11,7 @@ import {
   slitCompilableAndCopyable,
   watchSources,
 } from "./sources";
+import { FileContext } from "./file";
 
 import type { Options } from "@swc/core";
 
@@ -26,39 +27,33 @@ declare module "fs" {
 
 const { mkdir, rmdir, rm, copyFile, unlink } = promises;
 
-const cwd = process.cwd();
 const recursive = { recursive: true };
 
-/**
- * Removes the leading directory, including all parent relative paths
- */
-function stripComponents(filename: string) {
-  const components = filename.split("/").slice(1);
-  if (!components.length) {
-    return filename;
-  }
-  while (components[0] === "..") {
-    components.shift();
-  }
-  return components.join("/");
-}
+function getDest(
+  filename: string,
+  sourceLength: number,
+  cwd: string,
+  outDir: string,
+  ext?: string
+) {
+  const outDirAbsolutePath = slash(resolve(cwd, outDir));
+  let relativePath = slash(filename.slice(sourceLength));
 
-function getDest(filename: string, outDir: string, ext?: string) {
-  const relativePath = slash(relative(cwd, filename));
-  let base = stripComponents(relativePath);
   if (ext) {
-    base = base.replace(/\.\w*$/, ext);
+    relativePath = relativePath.replace(/\.\w*$/, ext);
   }
-  return join(outDir, base);
+  return join(outDirAbsolutePath, relativePath);
 }
 
 async function handleCompile(
   filename: string,
+  sourceLength: number,
+  cwd: string,
   outDir: string,
   sync: boolean,
   swcOptions: Options
 ) {
-  const dest = getDest(filename, outDir, ".js");
+  const dest = getDest(filename, sourceLength, cwd, outDir, ".js");
   const sourceFileName = slash(relative(dirname(dest), filename));
 
   const options = { ...swcOptions, sourceFileName };
@@ -73,11 +68,15 @@ async function handleCompile(
   }
 }
 
-async function handleCopy(filename: string, outDir: string) {
-  const dest = getDest(filename, outDir);
+async function handleCopy(
+  filename: string,
+  sourceLength: number,
+  cwd: string,
+  outDir: string
+) {
+  const dest = getDest(filename, sourceLength, cwd, outDir);
   const dir = dirname(dest);
 
-  console.log(filename);
   await mkdir(dir, recursive);
   await copyFile(filename, dest);
 
@@ -95,12 +94,29 @@ async function beforeStartCompilation(cliOptions: CliOptions) {
   }
 }
 
-async function initialCompilation(cliOptions: CliOptions, swcOptions: Options) {
+function absolutePath(filenames: string[], cwd: string): string[] {
+  return filenames.map((filename: string) => {
+    if (!isAbsolute(filename)) {
+      filename = resolve(cwd, filename);
+    }
+    return filename;
+  });
+}
+
+function resolveCwd(cwd: string): string {
+  return cwd ?? process.cwd();
+}
+
+async function initialCompilation(
+  cliOptions: CliOptions,
+  swcOptions: Options
+): Promise<FileContext> {
   const {
     includeDotfiles,
     filenames,
     copyFiles,
     extensions,
+    cwd,
     outDir,
     sync,
     quiet,
@@ -110,7 +126,12 @@ async function initialCompilation(cliOptions: CliOptions, swcOptions: Options) {
   const results = new Map<string, CompileStatus>();
 
   const start = process.hrtime();
-  const sourceFiles = await globSources(filenames, includeDotfiles);
+  const resolvedCwd = resolveCwd(cwd);
+  const filenamesAbsolutePath = absolutePath(filenames, resolvedCwd);
+  const [sourceFiles, fileContext] = await globSources(
+    filenamesAbsolutePath,
+    includeDotfiles
+  );
   const [compilable, copyable] = slitCompilableAndCopyable(
     sourceFiles,
     extensions,
@@ -120,7 +141,14 @@ async function initialCompilation(cliOptions: CliOptions, swcOptions: Options) {
   if (sync) {
     for (const filename of compilable) {
       try {
-        const result = await handleCompile(filename, outDir, sync, swcOptions);
+        const result = await handleCompile(
+          filename,
+          fileContext[filename],
+          resolvedCwd,
+          outDir,
+          sync,
+          swcOptions
+        );
         results.set(filename, result);
       } catch (err) {
         console.error(err.message);
@@ -129,7 +157,12 @@ async function initialCompilation(cliOptions: CliOptions, swcOptions: Options) {
     }
     for (const filename of copyable) {
       try {
-        const result = await handleCopy(filename, outDir);
+        const result = await handleCopy(
+          filename,
+          fileContext[filename],
+          resolvedCwd,
+          outDir
+        );
         results.set(filename, result);
       } catch (err) {
         console.error(err.message);
@@ -140,13 +173,24 @@ async function initialCompilation(cliOptions: CliOptions, swcOptions: Options) {
     await Promise.all([
       Promise.allSettled(
         compilable.map(file =>
-          handleCompile(file, outDir, sync, swcOptions).catch(err => {
+          handleCompile(
+            file,
+            fileContext[file],
+            resolvedCwd,
+            outDir,
+            sync,
+            swcOptions
+          ).catch(err => {
             console.error(err.message);
             throw err;
           })
         )
       ),
-      Promise.allSettled(copyable.map(file => handleCopy(file, outDir))),
+      Promise.allSettled(
+        copyable.map(file =>
+          handleCopy(file, fileContext[file], resolvedCwd, outDir)
+        )
+      ),
     ]).then(([compiled, copied]) => {
       compiled.forEach((result, index) => {
         const filename = compilable[index];
@@ -212,10 +256,17 @@ async function initialCompilation(cliOptions: CliOptions, swcOptions: Options) {
       throw new Error("Failed to compile");
     }
   }
+
+  return fileContext;
 }
 
-async function watchCompilation(cliOptions: CliOptions, swcOptions: Options) {
+async function watchCompilation(
+  cliOptions: CliOptions,
+  swcOptions: Options,
+  fileContext: FileContext
+) {
   const {
+    cwd,
     includeDotfiles,
     filenames,
     copyFiles,
@@ -225,7 +276,9 @@ async function watchCompilation(cliOptions: CliOptions, swcOptions: Options) {
     sync,
   } = cliOptions;
 
-  const watcher = await watchSources(filenames, includeDotfiles);
+  const resolvedCwd = resolveCwd(cwd);
+  const filenamesAbsolutePath = absolutePath(filenames, resolvedCwd);
+  const watcher = await watchSources(filenamesAbsolutePath, includeDotfiles);
   watcher.on("ready", () => {
     if (!quiet) {
       console.info("Watching for file changes.");
@@ -234,9 +287,13 @@ async function watchCompilation(cliOptions: CliOptions, swcOptions: Options) {
   watcher.on("unlink", async filename => {
     try {
       if (isCompilableExtension(filename, extensions)) {
-        await unlink(getDest(filename, outDir, ".js"));
+        await unlink(
+          getDest(filename, fileContext[filename], resolvedCwd, outDir, ".js")
+        );
       } else if (copyFiles) {
-        await unlink(getDest(filename, outDir));
+        await unlink(
+          getDest(filename, fileContext[filename], resolvedCwd, outDir)
+        );
       }
     } catch (err) {
       if (err.code !== "ENOENT") {
@@ -251,6 +308,8 @@ async function watchCompilation(cliOptions: CliOptions, swcOptions: Options) {
           const start = process.hrtime();
           const result = await handleCompile(
             filename,
+            fileContext[filename],
+            resolvedCwd,
             outDir,
             sync,
             swcOptions
@@ -268,7 +327,12 @@ async function watchCompilation(cliOptions: CliOptions, swcOptions: Options) {
       } else if (copyFiles) {
         try {
           const start = process.hrtime();
-          const result = await handleCopy(filename, outDir);
+          const result = await handleCopy(
+            filename,
+            fileContext[filename],
+            resolvedCwd,
+            outDir
+          );
           if (!quiet && result === CompileStatus.Copied) {
             const end = process.hrtime(start);
             console.log(
@@ -295,9 +359,9 @@ export default async function dir({
   const { watch } = cliOptions;
 
   await beforeStartCompilation(cliOptions);
-  await initialCompilation(cliOptions, swcOptions);
+  const fileContext = await initialCompilation(cliOptions, swcOptions);
 
   if (watch) {
-    await watchCompilation(cliOptions, swcOptions);
+    await watchCompilation(cliOptions, swcOptions, fileContext);
   }
 }

@@ -2,6 +2,7 @@ import glob from "fast-glob";
 import slash from "slash";
 import { stat } from "fs";
 import { join, basename, extname } from "path";
+import { FileContext } from "./file";
 
 /**
  * Find all input files based on source globs
@@ -9,11 +10,13 @@ import { join, basename, extname } from "path";
 export async function globSources(
   sources: string[],
   includeDotfiles = false
-): Promise<string[]> {
+): Promise<[string[], FileContext]> {
   const globConfig = {
     dot: includeDotfiles,
     nodir: true,
   };
+
+  let fileContext: FileContext = {};
 
   const files = await Promise.all(
     sources
@@ -26,10 +29,18 @@ export async function globSources(
               return;
             }
             if (!stat.isDirectory()) {
+              fileContext[source] = basename(source).length;
               resolve([source]);
             } else {
               glob(slash(join(source, "**")), globConfig)
-                .then(matches => resolve(matches))
+                .then(matches =>
+                  resolve(
+                    matches.map(match => {
+                      fileContext[match] = source.length;
+                      return match;
+                    })
+                  )
+                )
                 .catch(() => resolve([]));
             }
           });
@@ -37,7 +48,7 @@ export async function globSources(
       })
   );
 
-  return Array.from(new Set<string>(files.flat()));
+  return [Array.from(new Set<string>(files.flat())), fileContext];
 }
 
 type Split = [compilable: string[], copyable: string[]];

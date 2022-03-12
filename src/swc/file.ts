@@ -7,6 +7,15 @@ import { CliOptions } from "./options";
 import { globSources, isCompilableExtension, watchSources } from "./sources";
 import * as util from "./util";
 
+// export interface File {
+//   filename: string;
+//   sourceLength: number;
+// }
+
+export interface FileContext {
+  [filename: string]: number;
+}
+
 export default async function ({
   cliOptions,
   swcOptions,
@@ -107,10 +116,11 @@ export default async function ({
   ) {
     const results: typeof previousResults = new Map();
 
-    for (const filename of await globSources(
+    const [filenames, _] = await globSources(
       cliOptions.filenames,
       cliOptions.includeDotfiles
-    )) {
+    );
+    for (const filename of filenames) {
       if (isCompilableExtension(filename, cliOptions.extensions)) {
         results.set(filename, previousResults.get(filename)!);
       }

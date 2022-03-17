@@ -122,7 +122,7 @@ async function initialCompilation(cliOptions: CliOptions, swcOptions: Options) {
       try {
         const result = await handleCompile(filename, outDir, sync, swcOptions);
         results.set(filename, result);
-      } catch (err) {
+      } catch (err: any) {
         console.error(err.message);
         results.set(filename, CompileStatus.Failed);
       }
@@ -131,7 +131,7 @@ async function initialCompilation(cliOptions: CliOptions, swcOptions: Options) {
       try {
         const result = await handleCopy(filename, outDir);
         results.set(filename, result);
-      } catch (err) {
+      } catch (err: any) {
         console.error(err.message);
         results.set(filename, CompileStatus.Failed);
       }
@@ -238,7 +238,7 @@ async function watchCompilation(cliOptions: CliOptions, swcOptions: Options) {
       } else if (copyFiles) {
         await unlink(getDest(filename, outDir));
       }
-    } catch (err) {
+    } catch (err: any) {
       if (err.code !== "ENOENT") {
         console.error(err.stack);
       }
@@ -262,7 +262,7 @@ async function watchCompilation(cliOptions: CliOptions, swcOptions: Options) {
               (end[1] / 1000000).toFixed(2)
             );
           }
-        } catch (err) {
+        } catch (err: any) {
           console.error(err.message);
         }
       } else if (copyFiles) {
@@ -276,7 +276,7 @@ async function watchCompilation(cliOptions: CliOptions, swcOptions: Options) {
               (end[1] / 1000000).toFixed(2)
             );
           }
-        } catch (err) {
+        } catch (err: any) {
           console.error(`Failed to copy ${filename}`);
           console.error(err.message);
         }

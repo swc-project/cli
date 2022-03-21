@@ -128,7 +128,7 @@ export default async function ({
         } else {
           results.delete(filename);
         }
-      } catch (err) {
+      } catch (err: any) {
         console.error(err.message);
         results.set(filename, err);
       }

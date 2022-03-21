@@ -1,6 +1,5 @@
 # Lock files
 package-lock.json
-yarn.lock
 
 # Dependencies
 node_modules/

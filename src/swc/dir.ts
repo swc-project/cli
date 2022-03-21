@@ -209,7 +209,11 @@ async function initialCompilation(cliOptions: CliOptions, swcOptions: Options) {
       `Failed to compile ${failed} ${failed !== 1 ? "files" : "file"} with swc.`
     );
     if (!watch) {
-      throw new Error("Failed to compile");
+      const files = Array.from(results.entries())
+        .filter(([, status]) => status === CompileStatus.Failed)
+        .map(([filename, _]) => filename)
+        .join("\n");
+      throw new Error(`Failed to compile:\n${files}`);
     }
   }
 }

@@ -1,6 +1,6 @@
 import slash from "slash";
 import { existsSync, promises } from "fs";
-import { dirname, relative, join } from "path";
+import { dirname, relative, join, extname } from "path";
 import { CompileStatus } from "./constants";
 import { CliOptions } from "./options";
 import { compile } from "./util";
@@ -56,9 +56,11 @@ async function handleCompile(
   filename: string,
   outDir: string,
   sync: boolean,
-  swcOptions: Options
+  swcOptions: Options,
+  extension: string
 ) {
-  const dest = getDest(filename, outDir, ".js");
+  console.log({ extension });
+  const dest = getDest(filename, outDir, `.${extension}`);
   const sourceFileName = slash(relative(dirname(dest), filename));
 
   const options = { ...swcOptions, sourceFileName };
@@ -93,7 +95,19 @@ async function beforeStartCompilation(cliOptions: CliOptions) {
     }
   }
 }
-
+function getExtension(
+  filename: string,
+  keepFileExtension: boolean,
+  outFileExtension?: string
+) {
+  if (keepFileExtension) {
+    return extname(filename);
+  }
+  if (outFileExtension) {
+    return outFileExtension;
+  }
+  return "js";
+}
 async function initialCompilation(cliOptions: CliOptions, swcOptions: Options) {
   const {
     includeDotfiles,
@@ -104,6 +118,8 @@ async function initialCompilation(cliOptions: CliOptions, swcOptions: Options) {
     sync,
     quiet,
     watch,
+    keepFileExtension,
+    outFileExtension,
   } = cliOptions;
 
   const results = new Map<string, CompileStatus>();
@@ -119,7 +135,13 @@ async function initialCompilation(cliOptions: CliOptions, swcOptions: Options) {
   if (sync) {
     for (const filename of compilable) {
       try {
-        const result = await handleCompile(filename, outDir, sync, swcOptions);
+        const result = await handleCompile(
+          filename,
+          outDir,
+          sync,
+          swcOptions,
+          getExtension(filename, keepFileExtension, outFileExtension)
+        );
         results.set(filename, result);
       } catch (err: any) {
         console.error(err.message);
@@ -139,7 +161,13 @@ async function initialCompilation(cliOptions: CliOptions, swcOptions: Options) {
     await Promise.all([
       Promise.allSettled(
         compilable.map(file =>
-          handleCompile(file, outDir, sync, swcOptions).catch(err => {
+          handleCompile(
+            file,
+            outDir,
+            sync,
+            swcOptions,
+            getExtension(file, keepFileExtension, outFileExtension)
+          ).catch(err => {
             console.error(err.message);
             throw err;
           })
@@ -226,6 +254,8 @@ async function watchCompilation(cliOptions: CliOptions, swcOptions: Options) {
     outDir,
     quiet,
     sync,
+    keepFileExtension,
+    outFileExtension,
   } = cliOptions;
 
   const watcher = await watchSources(filenames, includeDotfiles);
@@ -256,7 +286,8 @@ async function watchCompilation(cliOptions: CliOptions, swcOptions: Options) {
             filename,
             outDir,
             sync,
-            swcOptions
+            swcOptions,
+            getExtension(filename, keepFileExtension, outFileExtension)
           );
           if (!quiet && result === CompileStatus.Compiled) {
             const end = process.hrtime(start);

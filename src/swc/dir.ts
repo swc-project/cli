@@ -1,6 +1,6 @@
 import slash from "slash";
 import { existsSync, promises } from "fs";
-import { dirname, relative, join, extname } from "path";
+import { dirname, relative, join } from "path";
 import { CompileStatus } from "./constants";
 import { CliOptions } from "./options";
 import { compile } from "./util";
@@ -59,7 +59,6 @@ async function handleCompile(
   swcOptions: Options,
   extension: string
 ) {
-  console.log({ extension });
   const dest = getDest(filename, outDir, `.${extension}`);
   const sourceFileName = slash(relative(dirname(dest), filename));
 
@@ -95,19 +94,7 @@ async function beforeStartCompilation(cliOptions: CliOptions) {
     }
   }
 }
-function getExtension(
-  filename: string,
-  keepFileExtension: boolean,
-  outFileExtension?: string
-) {
-  if (keepFileExtension) {
-    return extname(filename);
-  }
-  if (outFileExtension) {
-    return outFileExtension;
-  }
-  return "js";
-}
+
 async function initialCompilation(cliOptions: CliOptions, swcOptions: Options) {
   const {
     includeDotfiles,
@@ -118,7 +105,6 @@ async function initialCompilation(cliOptions: CliOptions, swcOptions: Options) {
     sync,
     quiet,
     watch,
-    keepFileExtension,
     outFileExtension,
   } = cliOptions;
 
@@ -140,7 +126,7 @@ async function initialCompilation(cliOptions: CliOptions, swcOptions: Options) {
           outDir,
           sync,
           swcOptions,
-          getExtension(filename, keepFileExtension, outFileExtension)
+          outFileExtension
         );
         results.set(filename, result);
       } catch (err: any) {
@@ -161,16 +147,12 @@ async function initialCompilation(cliOptions: CliOptions, swcOptions: Options) {
     await Promise.all([
       Promise.allSettled(
         compilable.map(file =>
-          handleCompile(
-            file,
-            outDir,
-            sync,
-            swcOptions,
-            getExtension(file, keepFileExtension, outFileExtension)
-          ).catch(err => {
-            console.error(err.message);
-            throw err;
-          })
+          handleCompile(file, outDir, sync, swcOptions, outFileExtension).catch(
+            err => {
+              console.error(err.message);
+              throw err;
+            }
+          )
         )
       ),
       Promise.allSettled(copyable.map(file => handleCopy(file, outDir))),
@@ -254,7 +236,6 @@ async function watchCompilation(cliOptions: CliOptions, swcOptions: Options) {
     outDir,
     quiet,
     sync,
-    keepFileExtension,
     outFileExtension,
   } = cliOptions;
 
@@ -287,7 +268,7 @@ async function watchCompilation(cliOptions: CliOptions, swcOptions: Options) {
             outDir,
             sync,
             swcOptions,
-            getExtension(filename, keepFileExtension, outFileExtension)
+            outFileExtension
           );
           if (!quiet && result === CompileStatus.Compiled) {
             const end = process.hrtime(start);

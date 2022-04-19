@@ -109,13 +109,8 @@ export const initProgram = () => {
   );
 
   program.option(
-    "--keep-file-extension",
-    "Preserve the file extensions of the input files"
-  );
-
-  program.option(
     "--out-file-extension [string]",
-    "Use a specific extension for the output files"
+    "Use a specific extension for the output files [default: js]"
   );
 
   program.option("--extensions [list]", "Use specific extensions", collect);
@@ -165,8 +160,7 @@ export interface CliOptions {
   readonly includeDotfiles: boolean;
   readonly deleteDirOnStart: boolean;
   readonly quiet: boolean;
-  readonly keepFileExtension: boolean;
-  readonly outFileExtension: string | undefined;
+  readonly outFileExtension: string;
 }
 
 export default function parserArgs(args: string[]) {
@@ -202,12 +196,6 @@ export default function parserArgs(args: string[]) {
   ) {
     errors.push(
       "stdin compilation requires either -f/--filename [filename] or --no-swcrc"
-    );
-  }
-
-  if (opts.keepFileExtension && opts.outFileExtension) {
-    errors.push(
-      "--out-file-extension cannot be used with --keep-file-extension"
     );
   }
 
@@ -276,8 +264,7 @@ export default function parserArgs(args: string[]) {
     includeDotfiles: !!opts.includeDotfiles,
     deleteDirOnStart: Boolean(opts.deleteDirOnStart),
     quiet: !!opts.quiet,
-    keepFileExtension: opts.keepFileExtension,
-    outFileExtension: opts.outFileExtension,
+    outFileExtension: opts.outFileExtension || "js",
   };
   return {
     swcOptions,

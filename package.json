@@ -54,7 +54,7 @@
     "@swc/cli": "^0.1.43",
     "@swc/core": "^1.2.66",
     "@swc/jest": "^0.1.2",
-    "@types/jest": "^26.0.23",
+    "@types/jest": "^27.5.0",
     "@types/node": "^12.19.16",
     "chokidar": "^3.5.1",
     "deepmerge": "^4.2.2",

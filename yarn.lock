@@ -355,6 +355,13 @@
     slash "^3.0.0"
     strip-ansi "^6.0.0"
 
+"@jest/create-cache-key-function@^27.4.2":
+  version "27.5.1"
+  resolved "https://registry.yarnpkg.com/@jest/create-cache-key-function/-/create-cache-key-function-27.5.1.tgz#7448fae15602ea95c828f5eceed35c202a820b31"
+  integrity sha512-dmH1yW+makpTSURTy8VzdUwFnfQh1G8R+DxO2Ho2FFmBbKFEVm+3jWdvFhE2VqB/LATCTokkP0dotjyQyw5/AQ==
+  dependencies:
+    "@jest/types" "^27.5.1"
+
 "@jest/environment@^27.5.1":
   version "27.5.1"
   resolved "https://registry.yarnpkg.com/@jest/environment/-/environment-27.5.1.tgz#d7425820511fe7158abbecc010140c3fd3be9c74"
@@ -636,10 +643,12 @@
     "@swc/core-win32-ia32-msvc" "1.2.159"
     "@swc/core-win32-x64-msvc" "1.2.159"
 
-"@swc/jest@^0.1.2":
-  version "0.1.5"
-  resolved "https://registry.yarnpkg.com/@swc/jest/-/jest-0.1.5.tgz#102e0cd5e82aee8af2df633fcd3b4bcedb42ec1a"
-  integrity sha512-PKKaJ5wqjkpmqQjGVbZxsXn5bIFCToqS1RHg5RbZzLnBL0eOIg8cD3SsnW9d5+im8L6QAWl6pETLZE2QFYSrFA==
+"@swc/jest@^0.2.21":
+  version "0.2.21"
+  resolved "https://registry.yarnpkg.com/@swc/jest/-/jest-0.2.21.tgz#e8c4e234016a914f4cfbb7d75844860a250c1d1c"
+  integrity sha512-/+NcExiZbxXANNhNPnIdFuGq62CeumulLS1bngwqIXd8H7d96LFUfrYzdt8tlTwLMel8tFtQ5aRjzVkyOTyPDw==
+  dependencies:
+    "@jest/create-cache-key-function" "^27.4.2"
 
 "@tootallnate/once@1":
   version "1.1.2"

@@ -8,11 +8,13 @@ import { join, basename, extname } from "path";
  */
 export async function globSources(
   sources: string[],
-  includeDotfiles = false
+  includeDotfiles = false,
+  ignore: string[] = []
 ): Promise<string[]> {
   const globConfig = {
     dot: includeDotfiles,
     nodir: true,
+    ignore: ignore,
   };
 
   const files = await Promise.all(

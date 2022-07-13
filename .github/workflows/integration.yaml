@@ -83,7 +83,7 @@ jobs:
           yarn swc editor -d ./build-editor/
           checkBuild "editor" "build-editor"
 
-          tee spack.config.js <<EOF
+          tee spack.config.cjs <<EOF
           module.exports = {
             entry: {
               web: __dirname + "/src/Three.js",

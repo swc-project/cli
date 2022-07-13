@@ -95,7 +95,7 @@ jobs:
           EOF
 
           echo "Run spack"
-          yarn spack
+          yarn spack --config spack.config.cjs
       - name: (swc + spack) rxjs
         shell: bash
         run: |

@@ -177,7 +177,7 @@ export default async function parseSpackArgs(args: string[]): Promise<{
   };
 
   const configOpts: BundleOptions = (await compileBundleOptions(
-    opts.config ?? path.resolve("spack.config.js")
+    path.resolve(opts.config) ?? path.resolve("spack.config.js")
   )) as any;
   if (opts.entry) {
     configOpts.entry = opts.entry;

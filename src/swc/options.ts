@@ -150,6 +150,8 @@ export interface CliOptions {
   readonly filename: string;
   readonly filenames: string[];
   readonly extensions: string[];
+  readonly ignore: string[];
+  readonly only: string[];
   readonly watch: boolean;
   readonly copyFiles: boolean;
   readonly includeDotfiles: boolean;
@@ -250,6 +252,8 @@ export default function parserArgs(args: string[]) {
     outFile: opts.outFile,
     filename: opts.filename,
     filenames,
+    ignore: opts.ignore,
+    only: opts.only,
     sync: !!opts.sync,
     sourceMapTarget: opts.sourceMapTarget,
     extensions: opts.extensions || DEFAULT_EXTENSIONS,

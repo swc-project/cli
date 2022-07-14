@@ -114,8 +114,8 @@ jobs:
           git clone --depth 1 https://github.com/ReactiveX/rxjs.git integration-tests/rxjs
 
           cd integration-tests/rxjs
-          npm install @swc/core @swc/cli --save-dev
-          npm install
+          npm install @swc/core @swc/cli --save-dev --legacy-peer-deps
+          npm install --legacy-peer-deps
           yarn link @swc/cli
 
           tee .swcrc <<EOF

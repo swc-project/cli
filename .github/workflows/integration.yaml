@@ -95,7 +95,7 @@ jobs:
           EOF
 
           echo "Workaround error casued by package.json type setting"
-          sed -E -i '' 's/\"type\": \"module\",/\"type\": \"commonjs\"/' package.json
+          sed -E -i 's/\"type\": \"module\",/\"type\": \"commonjs\",/' package.json || true
           echo "Run spack"
           yarn spack
       - name: (swc + spack) rxjs

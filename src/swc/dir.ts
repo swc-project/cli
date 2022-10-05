@@ -24,7 +24,7 @@ declare module "fs" {
   }
 }
 
-const { mkdir, rmdir, rm, copyFile, unlink } = promises;
+const { mkdir, rmdir, rm, copyFile, unlink, access } = promises;
 
 const cwd = process.cwd();
 const recursive = { recursive: true };
@@ -235,9 +235,19 @@ async function watchCompilation(cliOptions: CliOptions, swcOptions: Options) {
     }
   });
   watcher.on("unlink", async filename => {
+    let sourcemapExists = true;
+    try {
+      await access(getDest(filename, outDir, ".js.map"));
+    } catch (err: any) {
+      sourcemapExists = false;
+    }
+
     try {
       if (isCompilableExtension(filename, extensions)) {
         await unlink(getDest(filename, outDir, ".js"));
+        if (sourcemapExists) {
+          await unlink(getDest(filename, outDir, ".js.map"));
+        }
       } else if (copyFiles) {
         await unlink(getDest(filename, outDir));
       }

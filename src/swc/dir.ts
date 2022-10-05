@@ -8,7 +8,7 @@ import { outputResult } from "./compile";
 import {
   globSources,
   isCompilableExtension,
-  slitCompilableAndCopyable,
+  splitCompilableAndCopyable,
   watchSources,
 } from "./sources";
 
@@ -110,7 +110,7 @@ async function initialCompilation(cliOptions: CliOptions, swcOptions: Options) {
 
   const start = process.hrtime();
   const sourceFiles = await globSources(filenames, includeDotfiles);
-  const [compilable, copyable] = slitCompilableAndCopyable(
+  const [compilable, copyable] = splitCompilableAndCopyable(
     sourceFiles,
     extensions,
     copyFiles

@@ -3,7 +3,7 @@ import { existsSync, promises } from "fs";
 import { dirname, relative, join } from "path";
 import { CompileStatus } from "./constants";
 import { CliOptions } from "./options";
-import { compile } from "./util";
+import { compile, exists } from "./util";
 import { outputResult } from "./compile";
 import {
   globSources,
@@ -24,7 +24,7 @@ declare module "fs" {
   }
 }
 
-const { mkdir, rmdir, rm, copyFile, unlink, access } = promises;
+const { mkdir, rmdir, rm, copyFile, unlink } = promises;
 
 const cwd = process.cwd();
 const recursive = { recursive: true };
@@ -235,18 +235,13 @@ async function watchCompilation(cliOptions: CliOptions, swcOptions: Options) {
     }
   });
   watcher.on("unlink", async filename => {
-    let sourcemapExists = true;
-    try {
-      await access(getDest(filename, outDir, ".js.map"));
-    } catch (err: any) {
-      sourcemapExists = false;
-    }
-
     try {
       if (isCompilableExtension(filename, extensions)) {
         await unlink(getDest(filename, outDir, ".js"));
+        const sourcemapPath = getDest(filename, outDir, ".js.map");
+        const sourcemapExists = await exists(sourcemapPath);
         if (sourcemapExists) {
-          await unlink(getDest(filename, outDir, ".js.map"));
+          await unlink(sourcemapPath);
         }
       } else if (copyFiles) {
         await unlink(getDest(filename, outDir));

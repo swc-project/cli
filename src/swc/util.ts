@@ -1,7 +1,17 @@
 import * as swc from "@swc/core";
 import slash from "slash";
-import { mkdirSync, writeFileSync } from "fs";
+import { mkdirSync, writeFileSync, promises } from "fs";
 import { dirname, relative } from "path";
+
+export async function exists(path: string): Promise<boolean> {
+  let pathExists = true;
+  try {
+    await promises.access(path);
+  } catch (err: any) {
+    pathExists = false;
+  }
+  return pathExists;
+}
 
 export async function transform(
   filename: string,

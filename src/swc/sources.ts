@@ -56,7 +56,7 @@ export function isCompilableExtension(
 /**
  * Split file list to files that can be compiled and copied
  */
-export function slitCompilableAndCopyable(
+export function splitCompilableAndCopyable(
   files: string[],
   allowedExtension: string[],
   copyFiles: boolean

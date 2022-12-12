@@ -1,4 +1,4 @@
-import { globSources, slitCompilableAndCopyable } from "../sources";
+import { globSources, splitCompilableAndCopyable } from "../sources";
 import fs from "fs";
 import glob from "fast-glob";
 
@@ -60,11 +60,11 @@ describe("globSources", () => {
   });
 });
 
-describe("slitCompilableAndCopyable", () => {
+describe("splitCompilableAndCopyable", () => {
   const extensions = [".ts"];
   it("separate compilable and copyable when copyFiles=true", () => {
     const files = ["test.ts", "test.txt"];
-    const [compilable, copyable] = slitCompilableAndCopyable(
+    const [compilable, copyable] = splitCompilableAndCopyable(
       files,
       extensions,
       true
@@ -76,7 +76,7 @@ describe("slitCompilableAndCopyable", () => {
 
   it("separate compilable and copyable when copyFiles=false", () => {
     const files = ["test.ts", "test.txt"];
-    const [compilable, copyable] = slitCompilableAndCopyable(
+    const [compilable, copyable] = splitCompilableAndCopyable(
       files,
       extensions,
       false

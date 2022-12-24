@@ -42,6 +42,7 @@
   },
   "bin": {
     "swc": "./bin/swc.js",
+    "swcx": "./bin/swcx.js",
     "spack": "./bin/spack.js"
   },
   "dependencies": {

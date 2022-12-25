@@ -46,8 +46,10 @@
     "spack": "./bin/spack.js"
   },
   "dependencies": {
+    "bin-wrapper": "^4.1.0",
     "commander": "^7.1.0",
     "fast-glob": "^3.2.5",
+    "semver": "^7.3.8",
     "slash": "3.0.0",
     "source-map": "^0.7.3"
   },
@@ -57,6 +59,7 @@
     "@swc/jest": "^0.1.2",
     "@types/jest": "^26.0.23",
     "@types/node": "^12.19.16",
+    "@types/semver": "^7.3.13",
     "chokidar": "^3.5.1",
     "deepmerge": "^4.2.2",
     "jest": "^27.0.3",

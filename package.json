@@ -48,7 +48,7 @@
   },
   "dependencies": {
     "bin-wrapper": "^4.1.0",
-    "commander": "^7.1.0",
+    "commander": "^9.4.1",
     "fast-glob": "^3.2.5",
     "semver": "^7.3.8",
     "slash": "3.0.0",

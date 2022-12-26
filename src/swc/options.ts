@@ -116,6 +116,17 @@ export const initProgram = () => {
 `);
 
   program.usage("[options] <files ...>");
+  program.addHelpText(
+    "beforeAll",
+    `
+============================================================================================
+Beta version of @swc/cli is now available via 'swcx' command.
+This'll be a default command for @swc/cli@1.
+Please give it a try and report any issues at https://github.com/swc-project/swc/issues/4017
+============================================================================================
+
+`
+  );
 };
 
 function unstringify(val: string): any {

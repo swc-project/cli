@@ -48,7 +48,7 @@ const getCoreVersion = () => {
           devDependencies,
         } = require(cwdPackageManifestPath);
         const swcCoreVersion =
-          dependencies["@swc/core"] || devDependencies["@swc/core"];
+          dependencies?.["@swc/core"] || devDependencies?.["@swc/core"];
         if (swcCoreVersion) {
           return minVersion(swcCoreVersion);
         }

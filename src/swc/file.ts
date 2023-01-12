@@ -18,10 +18,13 @@ export default async function ({
     file: string,
     ...results: swc.Output[]
   ): Promise<swc.Output> {
-    const map = new SourceMapGenerator({
-      file,
-      sourceRoot: swcOptions.sourceRoot,
-    });
+    const initMap = () =>
+      new SourceMapGenerator({
+        file,
+        sourceRoot: swcOptions.sourceRoot,
+      });
+
+    let map: SourceMapGenerator | null = null;
 
     let code = "";
     let offset = 0;
@@ -35,6 +38,11 @@ export default async function ({
 
         consumer.eachMapping(mapping => {
           sources.add(mapping.source);
+
+          if (map == null) {
+            map = initMap();
+          }
+
           map.addMapping({
             generated: {
               line: mapping.generatedLine + offset,
@@ -50,7 +58,7 @@ export default async function ({
 
         sources.forEach(source => {
           const content = consumer.sourceContentFor(source, true);
-          if (content !== null) {
+          if (content !== null && map != null) {
             map.setSourceContent(source, content);
           }
         });
@@ -60,7 +68,7 @@ export default async function ({
 
     return {
       code,
-      map: JSON.stringify(map),
+      map: map || undefined,
     };
   }
 

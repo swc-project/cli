@@ -18,6 +18,7 @@ export default async function ({
     file: string,
     ...results: swc.Output[]
   ): Promise<swc.Output> {
+    let added = false;
     const map = new SourceMapGenerator({
       file,
       sourceRoot: swcOptions.sourceRoot,
@@ -30,6 +31,8 @@ export default async function ({
       code += result.code + "\n";
 
       if (result.map) {
+        added = true;
+
         const consumer = await new SourceMapConsumer(result.map);
         const sources = new Set<string>();
 
@@ -56,6 +59,10 @@ export default async function ({
         });
       }
       offset = code.split("\n").length - 1;
+    }
+
+    if (!added) {
+      return { code };
     }
 
     return {

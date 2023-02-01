@@ -46,7 +46,7 @@
     "spack": "./bin/spack.js"
   },
   "dependencies": {
-    "bin-wrapper": "^4.1.0",
+    "@mole-inc/bin-wrapper": "^8.0.1",
     "commander": "^7.1.0",
     "fast-glob": "^3.2.5",
     "semver": "^7.3.8",

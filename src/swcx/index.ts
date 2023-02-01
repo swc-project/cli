@@ -4,7 +4,7 @@ import minVersion from "semver/ranges/min-version";
 import { existsSync, readFileSync } from "fs";
 import * as path from "path";
 import { spawn, StdioOptions } from "child_process";
-const BinWrapper = require("bin-wrapper");
+const { BinWrapper } = require("@mole-inc/bin-wrapper");
 
 const { platform, arch } = process;
 

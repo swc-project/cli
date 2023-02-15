@@ -108,6 +108,11 @@ export const initProgram = () => {
     true
   );
 
+  program.option(
+    "--out-file-extension [string]",
+    "Use a specific extension for the output files [default: js]"
+  );
+
   program.option("--extensions [list]", "Use specific extensions", collect);
 
   program.version(`
@@ -166,6 +171,7 @@ export interface CliOptions {
   readonly includeDotfiles: boolean;
   readonly deleteDirOnStart: boolean;
   readonly quiet: boolean;
+  readonly outFileExtension: string;
 }
 
 export default function parserArgs(args: string[]) {
@@ -269,6 +275,7 @@ export default function parserArgs(args: string[]) {
     includeDotfiles: !!opts.includeDotfiles,
     deleteDirOnStart: Boolean(opts.deleteDirOnStart),
     quiet: !!opts.quiet,
+    outFileExtension: opts.outFileExtension || "js",
   };
   return {
     swcOptions,

@@ -37,7 +37,7 @@ const makeDir = promisify(mkdir);
 
         const emitStart = process.hrtime();
         if (spackOptions.output?.path) {
-            await Object.keys(output).map(async (name) => {
+            await Promise.all(Object.keys(output).map(async (name) => {
                 let fullPath = '';
                 if (isUserDefinedEntry(name)) {
                     fullPath = join(spackOptions.output.path, spackOptions.output.name.replace('[name]', name));
@@ -53,7 +53,7 @@ const makeDir = promisify(mkdir);
                 if (output[name].map) {
                     await write(`${fullPath}.map`, output[name].map, 'utf-8')
                 }
-            });
+            }));
         } else {
             throw new Error('Cannot print to stdout: not implemented yet')
         }

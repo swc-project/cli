@@ -134,7 +134,7 @@ const executeBinary = async () => {
 
   await bin.run();
 
-  const binPath = bin.path();
+  const binPath = bin.path;
 
   const [, , ...args] = process.argv;
   const options = { cwd: process.cwd(), stdio: "inherit" as StdioOptions };

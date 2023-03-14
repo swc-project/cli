@@ -61,6 +61,29 @@ describe("parserArgs", () => {
     expect(result).toEqual(defaultResult);
   });
 
+  describe("--out-file-extension", () => {
+    it("provides the extension in the parsed args", () => {
+      const args = [
+        "node",
+        "/path/to/node_modules/swc-cli/bin/swc.js",
+        "src",
+        "--out-file-extension",
+        "magic_custom_extension",
+      ];
+      const result = parserArgs(args);
+      const expectedOptions = deepmerge(defaultResult, {
+        cliOptions: { outFileExtension: "magic_custom_extension" },
+      });
+      expect(result).toEqual(expectedOptions);
+    });
+
+    it("provides the a sensible default", () => {
+      const args = ["node", "/path/to/node_modules/swc-cli/bin/swc.js", "src"];
+      const result = parserArgs(args);
+      expect(result.cliOptions.outFileExtension).toEqual("js");
+    });
+  });
+
   describe("errors", () => {
     let mockExit: jest.SpyInstance;
     let mockConsoleError: jest.SpyInstance;

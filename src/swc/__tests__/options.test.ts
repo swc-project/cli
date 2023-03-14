@@ -31,6 +31,7 @@ const createDefaultResult = (): ParserArgsReturn => ({
     outDir: undefined,
     // @ts-expect-error
     outFile: undefined,
+    outFileExtension: "js",
     quiet: false,
     sourceMapTarget: undefined,
     sync: false,

@@ -56,9 +56,10 @@ async function handleCompile(
   filename: string,
   outDir: string,
   sync: boolean,
-  swcOptions: Options
+  swcOptions: Options,
+  extension: string
 ) {
-  const dest = getDest(filename, outDir, ".js");
+  const dest = getDest(filename, outDir, `.${extension}`);
   const sourceFileName = slash(relative(dirname(dest), filename));
 
   const options = { ...swcOptions, sourceFileName };
@@ -101,6 +102,7 @@ async function initialCompilation(cliOptions: CliOptions, swcOptions: Options) {
     copyFiles,
     extensions,
     outDir,
+    outFileExtension,
     sync,
     quiet,
     watch,
@@ -119,7 +121,13 @@ async function initialCompilation(cliOptions: CliOptions, swcOptions: Options) {
   if (sync) {
     for (const filename of compilable) {
       try {
-        const result = await handleCompile(filename, outDir, sync, swcOptions);
+        const result = await handleCompile(
+          filename,
+          outDir,
+          sync,
+          swcOptions,
+          outFileExtension
+        );
         results.set(filename, result);
       } catch (err: any) {
         console.error(err.message);
@@ -139,10 +147,12 @@ async function initialCompilation(cliOptions: CliOptions, swcOptions: Options) {
     await Promise.all([
       Promise.allSettled(
         compilable.map(file =>
-          handleCompile(file, outDir, sync, swcOptions).catch(err => {
-            console.error(err.message);
-            throw err;
-          })
+          handleCompile(file, outDir, sync, swcOptions, outFileExtension).catch(
+            err => {
+              console.error(err.message);
+              throw err;
+            }
+          )
         )
       ),
       Promise.allSettled(copyable.map(file => handleCopy(file, outDir))),
@@ -224,6 +234,7 @@ async function watchCompilation(cliOptions: CliOptions, swcOptions: Options) {
     copyFiles,
     extensions,
     outDir,
+    outFileExtension,
     quiet,
     sync,
   } = cliOptions;
@@ -261,7 +272,8 @@ async function watchCompilation(cliOptions: CliOptions, swcOptions: Options) {
             filename,
             outDir,
             sync,
-            swcOptions
+            swcOptions,
+            outFileExtension
           );
           if (!quiet && result === CompileStatus.Compiled) {
             const end = process.hrtime(start);

@@ -12,7 +12,17 @@ const createDefaultResult = (): ParserArgsReturn => ({
   cliOptions: {
     copyFiles: false,
     deleteDirOnStart: false,
-    extensions: [".js", ".jsx", ".es6", ".es", ".mjs", ".ts", ".tsx"],
+    extensions: [
+      ".js",
+      ".jsx",
+      ".es6",
+      ".es",
+      ".mjs",
+      ".ts",
+      ".tsx",
+      ".cts",
+      ".mts",
+    ],
     // @ts-expect-error
     filename: undefined,
     filenames: ["src"],

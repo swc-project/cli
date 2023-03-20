@@ -240,4 +240,21 @@ describe('parserArgs', () => {
       expect(result.swcOptions).toEqual(expectedOptions);
     });
   })
+
+  describe("--ignore", () => {
+    it("includes ignore in cli options", async () => {
+      const args = [
+        "node",
+        "/path/to/node_modules/swc-cli/bin/swc.js",
+        "src",
+        "--ignore",
+        "*.js",
+      ];
+      expect(parserArgs(args).cliOptions).toEqual(
+        expect.objectContaining({
+          ignore: ["*.js"],
+        })
+      );
+    });
+  });
 })

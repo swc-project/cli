@@ -98,6 +98,7 @@ async function initialCompilation(cliOptions: CliOptions, swcOptions: Options) {
   const {
     includeDotfiles,
     filenames,
+    ignore,
     copyFiles,
     extensions,
     outDir,
@@ -109,7 +110,7 @@ async function initialCompilation(cliOptions: CliOptions, swcOptions: Options) {
   const results = new Map<string, CompileStatus>();
 
   const start = process.hrtime();
-  const sourceFiles = await globSources(filenames, includeDotfiles);
+  const sourceFiles = await globSources(filenames, includeDotfiles, ignore);
   const [compilable, copyable] = splitCompilableAndCopyable(
     sourceFiles,
     extensions,
@@ -188,9 +189,8 @@ async function initialCompilation(cliOptions: CliOptions, swcOptions: Options) {
   if (!quiet && compiled + copied) {
     let message = "";
     if (compiled) {
-      message += `Successfully compiled: ${compiled} ${
-        compiled > 1 ? "files" : "file"
-      }`;
+      message += `Successfully compiled: ${compiled} ${compiled > 1 ? "files" : "file"
+        }`;
     }
     if (compiled && copied) {
       message += ", ";

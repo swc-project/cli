@@ -1,12 +1,12 @@
 import { version as swcCoreVersion } from "@swc/core";
 import { BundleOptions, compileBundleOptions } from "@swc/core/spack";
 import commander from "commander";
-import * as path from 'path';
+import * as path from "path";
 
 const pkg = require("../../package.json");
 
 export interface SpackCliOptions {
-    debug: boolean
+  debug: boolean;
 }
 
 commander.option("--config [path]", "Path to a spack.config.js file to use.");
@@ -16,17 +16,17 @@ commander.option("--mode <development | production | none>", "Mode to use");
 commander.option("--target [browser | node]", "Target runtime environment");
 
 commander.option(
-    '--context [path]', `The base directory (absolute path!) for resolving the 'entry'`
-+ ` option. If 'output.pathinfo' is set, the included pathinfo is shortened to this directory`,
-    'The current directory'
+  "--context [path]",
+  `The base directory (absolute path!) for resolving the 'entry'` +
+    ` option. If 'output.pathinfo' is set, the included pathinfo is shortened to this directory`,
+  "The current directory"
 );
 
-commander.option('--entry [list]', "List of entries", collect);
+commander.option("--entry [list]", "List of entries", collect);
 
 // commander.option('-W --watch', `Enter watch mode, which rebuilds on file change.`)
 
-
-commander.option('--debug', `Switch loaders to debug mode`)
+commander.option("--debug", `Switch loaders to debug mode`);
 // commander.option('--devtool', `Select a developer tool to enhance debugging.`)
 
 // -d           shortcut for --debug --devtool eval-cheap-module-source-map
@@ -40,8 +40,11 @@ commander.option('--debug', `Switch loaders to debug mode`)
 // --module-bind-pre   Bind an extension to a pre loader                 [문자열]
 
 // Output options:
-commander.option('-o --output', `The output path and file for compilation assets`);
-commander.option('--output-path', `The output directory as **absolute path**`);
+commander.option(
+  "-o --output",
+  `The output path and file for compilation assets`
+);
+commander.option("--output-path", `The output directory as **absolute path**`);
 //   --output-filename             Specifies the name of each output file on disk.
 //                                 You must **not** specify an absolute path here!
 //                                 The `output.path` option determines the location
@@ -156,60 +159,61 @@ commander.option('--output-path', `The output directory as **absolute path**`);
 //   --json, -j     Prints the result as JSON.                            [boolean]
 
 commander.version(
-    `@swc/cli: ${pkg.version}
+  `@swc/cli: ${pkg.version}
 @swc/core: ${swcCoreVersion}`
 );
 
 export default async function parseSpackArgs(args: string[]): Promise<{
-    cliOptions: SpackCliOptions,
-    spackOptions: BundleOptions,
+  cliOptions: SpackCliOptions;
+  spackOptions: BundleOptions;
 }> {
-    //
-    const cmd = commander.parse(args);
-    const opts = cmd.opts();
+  //
+  const cmd = commander.parse(args);
+  const opts = cmd.opts();
 
-    const cliOptions: SpackCliOptions = {
-        // watch: !!opts.watch,
-        debug: !!opts.debug,
-    };
+  const cliOptions: SpackCliOptions = {
+    // watch: !!opts.watch,
+    debug: !!opts.debug,
+  };
 
-    const configOpts: BundleOptions = await compileBundleOptions(opts.config ?? path.resolve('spack.config.js')) as any;
-    if (opts.entry) {
-        configOpts.entry = opts.entry;
-    }
-    if (opts.mode) {
-        configOpts.mode = opts.mode;
-    }
-    if (opts.target) {
-        configOpts.target = opts.target;
-    }
-    if (!configOpts.output) {
-        configOpts.output = {} as any;
-    }
-    if (!configOpts.output.path) {
-        configOpts.output.path = opts.outputPath ?? '[name].js';
-    }
-    if (!configOpts.output.name) {
-        configOpts.output.name = opts.output ?? '[name].js';
-    }
-    // if (!configOpts.output.name) {
-    //     configOpts.output.path = opts.outputPath;
-    // }
+  const configOpts: BundleOptions = (await compileBundleOptions(
+    opts.config ?? path.resolve("spack.config.js")
+  )) as any;
+  if (opts.entry) {
+    configOpts.entry = opts.entry;
+  }
+  if (opts.mode) {
+    configOpts.mode = opts.mode;
+  }
+  if (opts.target) {
+    configOpts.target = opts.target;
+  }
+  if (!configOpts.output) {
+    configOpts.output = {} as any;
+  }
+  if (!configOpts.output.path) {
+    configOpts.output.path = opts.outputPath ?? "[name].js";
+  }
+  if (!configOpts.output.name) {
+    configOpts.output.name = opts.output ?? "[name].js";
+  }
+  // if (!configOpts.output.name) {
+  //     configOpts.output.path = opts.outputPath;
+  // }
 
-    return {
-        cliOptions,
-        spackOptions: {
-            ...configOpts,
-        },
-    }
+  return {
+    cliOptions,
+    spackOptions: {
+      ...configOpts,
+    },
+  };
 }
 
-
 function collect(value: any, previousValue: any): Array<string> {
-    // If the user passed the option with no value, like "babel file.js --presets", do nothing.
-    if (typeof value !== "string") return previousValue;
+  // If the user passed the option with no value, like "babel file.js --presets", do nothing.
+  if (typeof value !== "string") return previousValue;
 
-    const values = value.split(",");
+  const values = value.split(",");
 
-    return previousValue ? previousValue.concat(values) : values;
+  return previousValue ? previousValue.concat(values) : values;
 }

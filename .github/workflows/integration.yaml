@@ -8,7 +8,7 @@ jobs:
     strategy:
       matrix:
         os: [macos-latest, windows-latest, ubuntu-latest]
-        node-version: [12.x, 14.x, 16.x]
+        node-version: [14.x, 16.x, 18.x]
 
     steps:
       - uses: actions/checkout@v2
@@ -40,7 +40,7 @@ jobs:
               echo "File count do not match source count: ${SOURCE_JS_COUNT} to build ${BUILD_JS_COUNT}"
               exit 1
             fi
-          } 
+          }
 
           mkdir -p integration-tests/three.js
           git clone --depth 1 https://github.com/mrdoob/three.js.git integration-tests/three.js
@@ -66,20 +66,20 @@ jobs:
           EOF
 
           echo "Run swc sync"
-          rm -rf build 
+          rm -rf build
           yarn swc --sync src -d build
           checkBuild "src" "build"
 
-          rm -rf build-editor 
+          rm -rf build-editor
           yarn swc --sync editor -d ./build-editor/
           checkBuild "editor" "build-editor"
 
           echo "Run swc async"
-          rm -rf build 
+          rm -rf build
           yarn swc src -d ./build/
           checkBuild "src" "build"
 
-          rm -rf build-editor 
+          rm -rf build-editor
           yarn swc editor -d ./build-editor/
           checkBuild "editor" "build-editor"
 
@@ -108,7 +108,7 @@ jobs:
               echo "File count do not match source count: ${SOURCE_JS_COUNT} to build ${BUILD_JS_COUNT}"
               exit 1
             fi
-          } 
+          }
 
           mkdir -p integration-tests/rxjs
           git clone --depth 1 https://github.com/ReactiveX/rxjs.git integration-tests/rxjs
@@ -142,7 +142,7 @@ jobs:
           yarn swc --sync spec -d build-spec
           checkBuild "spec" "build-spec"
 
-          rm -rf build 
+          rm -rf build
 
           echo "Run swc async"
           rm -rf build

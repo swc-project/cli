@@ -189,8 +189,9 @@ async function initialCompilation(cliOptions: CliOptions, swcOptions: Options) {
   if (!quiet && compiled + copied) {
     let message = "";
     if (compiled) {
-      message += `Successfully compiled: ${compiled} ${compiled > 1 ? "files" : "file"
-        }`;
+      message += `Successfully compiled: ${compiled} ${
+        compiled > 1 ? "files" : "file"
+      }`;
     }
     if (compiled && copied) {
       message += ", ";

@@ -47,7 +47,7 @@
   },
   "dependencies": {
     "@mole-inc/bin-wrapper": "^8.0.1",
-    "commander": "^7.1.0",
+    "commander": "^11.0.0",
     "fast-glob": "^3.2.5",
     "semver": "^7.3.8",
     "slash": "3.0.0",

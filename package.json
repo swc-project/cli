@@ -58,7 +58,7 @@
     "@swc/core": "^1.2.66",
     "@swc/jest": "^0.1.2",
     "@types/jest": "^29.5.0",
-    "@types/node": "^12.19.16",
+    "@types/node": "^20.8.4",
     "@types/semver": "^7.3.13",
     "chokidar": "^3.5.1",
     "deepmerge": "^4.2.2",

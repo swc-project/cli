@@ -58,6 +58,17 @@ describe("globSources", () => {
 
     expect([...files]).toEqual(["file"]);
   });
+
+  it("ignore sources when patterns provided", async () => {
+    (fs as any).setMockStats({ directory: { isDirectory: () => true } });
+
+    (glob as unknown as jest.Mock).mockResolvedValue([]);
+    await globSources(["directory"], false, ["**/file"]);
+    expect(glob).toHaveBeenCalledWith(
+      "directory/**",
+      expect.objectContaining({ ignore: ["**/file"] })
+    );
+  });
 });
 
 describe("splitCompilableAndCopyable", () => {

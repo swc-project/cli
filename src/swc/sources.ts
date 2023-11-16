@@ -17,7 +17,10 @@ export async function globSources(
 
   const files = await Promise.all(
     sources
-      .filter(source => includeDotfiles || !basename(source).startsWith("."))
+      .filter(
+        source =>
+          includeDotfiles || source === "." || !basename(source).startsWith(".")
+      )
       .map(source => {
         return new Promise<string[]>(resolve => {
           stat(source, (err, stat) => {

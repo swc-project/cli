@@ -1,6 +1,6 @@
 {
   "name": "@swc/cli",
-  "version": "0.1.62",
+  "version": "0.1.63",
   "description": "CLI for the swc project",
   "main": "lib/swc/index.js",
   "scripts": {

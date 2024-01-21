@@ -49,6 +49,7 @@
     "@mole-inc/bin-wrapper": "^8.0.1",
     "commander": "^7.1.0",
     "fast-glob": "^3.2.5",
+    "minimatch": "^9.0.3",
     "semver": "^7.3.8",
     "slash": "3.0.0",
     "source-map": "^0.7.3"

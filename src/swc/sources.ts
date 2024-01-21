@@ -2,6 +2,7 @@ import glob from "fast-glob";
 import slash from "slash";
 import { stat } from "fs";
 import { join, basename, extname } from "path";
+import { minimatch } from "minimatch";
 
 /**
  * Find all input files based on source globs
@@ -42,7 +43,13 @@ export async function globSources(
       })
   );
 
-  return Array.from(new Set<string>(files.flat()));
+  const f = files.flat().filter(filename => {
+    return (
+      only.length === 0 || only.some(only => minimatch(slash(filename), only))
+    );
+  });
+
+  return Array.from(new Set<string>(f));
 }
 
 type Split = [compilable: string[], copyable: string[]];

@@ -104,12 +104,19 @@ async function initialCompilation(cliOptions: CliOptions, swcOptions: Options) {
     sync,
     quiet,
     watch,
+    only,
+    ignore,
   } = cliOptions;
 
   const results = new Map<string, CompileStatus>();
 
   const start = process.hrtime();
-  const sourceFiles = await globSources(filenames, includeDotfiles);
+  const sourceFiles = await globSources(
+    filenames,
+    only,
+    ignore,
+    includeDotfiles
+  );
   const [compilable, copyable] = splitCompilableAndCopyable(
     sourceFiles,
     extensions,

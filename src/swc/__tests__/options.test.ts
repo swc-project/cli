@@ -26,7 +26,9 @@ const createDefaultResult = (): ParserArgsReturn => ({
     // @ts-expect-error
     filename: undefined,
     filenames: ["src"],
+    ignore: [],
     includeDotfiles: false,
+    only: [],
     // @ts-expect-error
     outDir: undefined,
     // @ts-expect-error

@@ -116,6 +116,8 @@ export default async function ({
 
     for (const filename of await globSources(
       cliOptions.filenames,
+      cliOptions.only,
+      cliOptions.ignore,
       cliOptions.includeDotfiles
     )) {
       if (isCompilableExtension(filename, cliOptions.extensions)) {

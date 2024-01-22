@@ -45,7 +45,9 @@ export async function globSources(
 
   const f = files.flat().filter(filename => {
     return (
-      only.length === 0 || only.some(only => minimatch(slash(filename), only))
+      !only ||
+      only.length === 0 ||
+      only.some(only => minimatch(slash(filename), only))
     );
   });
 

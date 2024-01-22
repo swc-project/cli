@@ -103,6 +103,11 @@ export const initProgram = () => {
   );
 
   program.option(
+    "--workers [number]",
+    "The number of workers to use for parallel processing"
+  );
+
+  program.option(
     "--log-watch-compilation",
     "Log a message when a watched file is successfully compiled",
     true
@@ -157,6 +162,7 @@ export interface CliOptions {
    * Invoke swc using transformSync. It's useful for debugging.
    */
   readonly sync: boolean;
+  readonly workers: number | undefined;
   readonly sourceMapTarget?: string;
   readonly filename: string;
   readonly filenames: string[];
@@ -205,6 +211,16 @@ export default function parserArgs(args: string[]) {
     errors.push(
       "stdin compilation requires either -f/--filename [filename] or --no-swcrc"
     );
+  }
+
+  let workers: number | undefined;
+  if (opts.workers != null) {
+    workers = parseFloat(opts.workers);
+    if (!Number.isInteger(workers) || workers < 0) {
+      errors.push(
+        "--workers must be a positive integer (found " + opts.workers + ")"
+      );
+    }
   }
 
   if (errors.length) {
@@ -265,6 +281,7 @@ export default function parserArgs(args: string[]) {
     filename: opts.filename,
     filenames,
     sync: !!opts.sync,
+    workers,
     sourceMapTarget: opts.sourceMapTarget,
     extensions: opts.extensions || DEFAULT_EXTENSIONS,
     watch: !!opts.watch,

@@ -1,7 +1,7 @@
 import * as swc from "@swc/core";
 import slash from "slash";
 import { mkdirSync, writeFileSync, promises } from "fs";
-import { dirname, relative } from "path";
+import { dirname, join, relative } from "path";
 
 export async function exists(path: string): Promise<boolean> {
   let pathExists = true;
@@ -124,4 +124,29 @@ export function assertCompilationResult<T>(
       `Failed to compile ${failed} ${failed !== 1 ? "files" : "file"} with swc.`
     );
   }
+}
+
+/**
+ * Removes the leading directory, including all parent relative paths
+ */
+function stripComponents(filename: string) {
+  const components = filename.split("/").slice(1);
+  if (!components.length) {
+    return filename;
+  }
+  while (components[0] === "..") {
+    components.shift();
+  }
+  return components.join("/");
+}
+
+const cwd = process.cwd();
+
+export function getDest(filename: string, outDir: string, ext?: string) {
+  const relativePath = slash(relative(cwd, filename));
+  let base = stripComponents(relativePath);
+  if (ext) {
+    base = base.replace(/\.\w*$/, ext);
+  }
+  return join(outDir, base);
 }

@@ -62,7 +62,7 @@ export async function outputResult(
   } else {
     await Promise.all([
       writeFile(destFile, sourceCode, { mode }),
-      writeFile(sourceMapPath, sourceMap, { mode }),
+      writeFile(sourceMapPath, sourceMap!, { mode }),
     ]);
   }
 }

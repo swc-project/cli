@@ -56,7 +56,7 @@ const makeDir = promisify(mkdir);
         await makeDir(dirname(fullPath), { recursive: true });
         await write(fullPath, output[name].code, "utf-8");
         if (output[name].map) {
-          await write(`${fullPath}.map`, output[name].map, "utf-8");
+          await write(`${fullPath}.map`, output[name].map!, "utf-8");
         }
       });
     } else {

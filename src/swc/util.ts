@@ -126,25 +126,10 @@ export function assertCompilationResult<T>(
   }
 }
 
-/**
- * Removes the leading directory, including all parent relative paths
- */
-function stripComponents(filename: string) {
-  const components = filename.split("/").slice(1);
-  if (!components.length) {
-    return filename;
-  }
-  while (components[0] === "..") {
-    components.shift();
-  }
-  return components.join("/");
-}
-
 const cwd = process.cwd();
 
 export function getDest(filename: string, outDir: string, ext?: string) {
-  const relativePath = slash(relative(cwd, filename));
-  let base = stripComponents(relativePath);
+  let base = slash(relative(cwd, filename));
   if (ext) {
     base = base.replace(/\.\w*$/, ext);
   }

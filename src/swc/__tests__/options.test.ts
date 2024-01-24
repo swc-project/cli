@@ -130,6 +130,32 @@ describe("parserArgs", () => {
       expect(mockExit).toHaveBeenCalledWith(2);
       expect(mockConsoleError).toHaveBeenCalledTimes(2);
     });
+
+    it("--workers exits on non-numeric values", async () => {
+      const args = [
+        "node",
+        "/path/to/node_modules/swc-cli/bin/swc.js",
+        "--workers",
+        "not-a-number",
+        "src",
+      ];
+      await parserArgs(args);
+      expect(mockExit).toHaveBeenCalledWith(2);
+      expect(mockConsoleError).toHaveBeenCalledTimes(2);
+    });
+
+    it("--workers exits on non-integer values", async () => {
+      const args = [
+        "node",
+        "/path/to/node_modules/swc-cli/bin/swc.js",
+        "--workers",
+        "1.5",
+        "src",
+      ];
+      await parserArgs(args);
+      expect(mockExit).toHaveBeenCalledWith(2);
+      expect(mockConsoleError).toHaveBeenCalledTimes(2);
+    });
   });
 
   describe("--source-maps", () => {

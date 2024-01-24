@@ -38,7 +38,7 @@
   },
   "homepage": "https://github.com/swc-project/cli#readme",
   "engines": {
-    "node": ">= 12.13"
+    "node": ">= 16.14.0"
   },
   "bin": {
     "swc": "./bin/swc.js",
@@ -50,6 +50,7 @@
     "commander": "^7.1.0",
     "fast-glob": "^3.2.5",
     "minimatch": "^9.0.3",
+    "piscina": "^4.3.0",
     "semver": "^7.3.8",
     "slash": "3.0.0",
     "source-map": "^0.7.3"
@@ -59,7 +60,7 @@
     "@swc/core": "^1.2.66",
     "@swc/jest": "^0.1.2",
     "@types/jest": "^29.5.0",
-    "@types/node": "^12.19.16",
+    "@types/node": "^20.11.5",
     "@types/semver": "^7.3.13",
     "chokidar": "^3.5.1",
     "deepmerge": "^4.2.2",

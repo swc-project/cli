@@ -118,10 +118,12 @@ async function initialCompilation(cliOptions: CliOptions, swcOptions: Options) {
     await Promise.all([
       Promise.allSettled(
         compilable.map(filename =>
-          workers.run({ filename, outDir, sync, swcOptions }).catch(err => {
-            console.error(err.message);
-            throw err;
-          })
+          workers
+            .run({ filename, outDir, sync, cliOptions, swcOptions })
+            .catch(err => {
+              console.error(err.message);
+              throw err;
+            })
         )
       ),
       Promise.allSettled(

@@ -35,6 +35,7 @@ const createDefaultResult = (): ParserArgsReturn => ({
     outFile: undefined,
     quiet: false,
     sourceMapTarget: undefined,
+    stripLeadingPaths: false,
     sync: false,
     watch: false,
   },
@@ -206,6 +207,14 @@ describe("parserArgs", () => {
 
   describe("--config", () => {
     it("throws with no config", async () => {
+      let mockConsoleError: jest.SpyInstance;
+
+      mockConsoleError = jest
+        .spyOn(process.stderr, "write")
+        .mockImplementation(() => {
+          return true;
+        });
+
       const args = [
         "node",
         "/path/to/node_modules/swc-cli/bin/swc.js",
@@ -213,6 +222,8 @@ describe("parserArgs", () => {
         "-C",
       ];
       expect(() => parserArgs(args)).toThrow();
+
+      mockConsoleError.mockRestore();
     });
 
     it("react development", async () => {

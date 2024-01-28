@@ -60,6 +60,7 @@ async function initialCompilation(cliOptions: CliOptions, swcOptions: Options) {
     copyFiles,
     extensions,
     outDir,
+    outFileExtension,
     stripLeadingPaths,
     sync,
     quiet,
@@ -92,6 +93,7 @@ async function initialCompilation(cliOptions: CliOptions, swcOptions: Options) {
           sync,
           cliOptions,
           swcOptions,
+          outFileExtension,
         });
         results.set(filename, result);
       } catch (err: any) {
@@ -119,7 +121,14 @@ async function initialCompilation(cliOptions: CliOptions, swcOptions: Options) {
       Promise.allSettled(
         compilable.map(filename =>
           workers
-            .run({ filename, outDir, sync, cliOptions, swcOptions })
+            .run({
+              filename,
+              outDir,
+              sync,
+              cliOptions,
+              swcOptions,
+              outFileExtension,
+            })
             .catch(err => {
               console.error(err.message);
               throw err;
@@ -208,6 +217,7 @@ async function watchCompilation(cliOptions: CliOptions, swcOptions: Options) {
     extensions,
     outDir,
     stripLeadingPaths,
+    outFileExtension,
     quiet,
     sync,
   } = cliOptions;
@@ -252,6 +262,7 @@ async function watchCompilation(cliOptions: CliOptions, swcOptions: Options) {
             sync,
             cliOptions,
             swcOptions,
+            outFileExtension,
           });
           if (!quiet && result === CompileStatus.Compiled) {
             const end = process.hrtime(start);

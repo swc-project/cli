@@ -82,6 +82,11 @@ export const initProgram = () => {
   );
 
   program.option(
+    "--out-file-extension [string]",
+    "Use a specific extension for the output files [default: js]"
+  );
+
+  program.option(
     "-D, --copy-files",
     "When compiling a directory copy over non-compilable files"
   );
@@ -176,6 +181,7 @@ export interface CliOptions {
   readonly extensions: string[];
   readonly watch: boolean;
   readonly copyFiles: boolean;
+  readonly outFileExtension: string;
   readonly includeDotfiles: boolean;
   readonly deleteDirOnStart: boolean;
   readonly quiet: boolean;
@@ -294,6 +300,7 @@ export default function parserArgs(args: string[]) {
     extensions: opts.extensions || DEFAULT_EXTENSIONS,
     watch: !!opts.watch,
     copyFiles: !!opts.copyFiles,
+    outFileExtension: opts.outFileExtension || "js",
     includeDotfiles: !!opts.includeDotfiles,
     deleteDirOnStart: Boolean(opts.deleteDirOnStart),
     quiet: !!opts.quiet,

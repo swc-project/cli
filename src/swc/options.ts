@@ -5,6 +5,7 @@ import type { Options } from "@swc/core";
 const pkg = require("../../package.json");
 
 let program: commander.Command;
+export const DEFAULT_OUT_FILE_EXTENSION = "js";
 
 export const initProgram = () => {
   program = new commander.Command();
@@ -84,7 +85,7 @@ export const initProgram = () => {
   program.option(
     "--out-file-extension [string]",
     "Use a specific extension for the output files [default: js]",
-    "js"
+    DEFAULT_OUT_FILE_EXTENSION,
   );
 
   program.option(
@@ -302,7 +303,7 @@ export default function parserArgs(args: string[]) {
     extensions: opts.extensions || DEFAULT_EXTENSIONS,
     watch: !!opts.watch,
     copyFiles: !!opts.copyFiles,
-    outFileExtension: opts.outFileExtension || "js",
+    outFileExtension: opts.outFileExtension || DEFAULT_OUT_FILE_EXTENSION,
     includeDotfiles: !!opts.includeDotfiles,
     deleteDirOnStart: Boolean(opts.deleteDirOnStart),
     quiet: !!opts.quiet,

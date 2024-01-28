@@ -83,7 +83,8 @@ export const initProgram = () => {
 
   program.option(
     "--out-file-extension [string]",
-    "Use a specific extension for the output files [default: js]"
+    "Use a specific extension for the output files [default: js]",
+    "js"
   );
 
   program.option(
@@ -93,7 +94,8 @@ export const initProgram = () => {
 
   program.option(
     "--strip-leading-paths",
-    "Remove the leading directory (including all parent relative paths) when building the final output path"
+    "Remove the leading directory (including all parent relative paths) when building the final output path",
+    false
   );
 
   program.option(

@@ -80,7 +80,7 @@ describe("parserArgs", () => {
       expect(result).toEqual(expectedOptions);
     });
 
-    it("provides the a sensible default", () => {
+    it("provides a sensible default", () => {
       const args = ["node", "/path/to/node_modules/swc-cli/bin/swc.js", "src"];
       const result = parserArgs(args);
       expect(result.cliOptions.outFileExtension).toEqual("js");

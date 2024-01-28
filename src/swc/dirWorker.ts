@@ -13,12 +13,13 @@ export default async function handleCompile(opts: {
   sync: boolean;
   cliOptions: CliOptions;
   swcOptions: Options;
+  outFileExtension: string;
 }) {
   const dest = getDest(
     opts.filename,
     opts.outDir,
     opts.cliOptions.stripLeadingPaths,
-    ".js"
+    `.${opts.outFileExtension}`
   );
   const sourceFileName = slash(relative(dirname(dest), opts.filename));
 

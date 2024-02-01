@@ -1,4 +1,0 @@
-{
-  "pre-commit": "yarn nano-staged",
-  "pre-push": "yarn test"
-}
